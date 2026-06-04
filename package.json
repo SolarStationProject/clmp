@@ -1,0 +1,19 @@
+{
+  "name": "cleanmap",
+  "version": "1.0.0",
+  "description": "Sistema de Gestión de Microbasurales - Universidad Andrés Bello 2026",
+  "private": true,
+  "engines": {
+    "node": "22.17.1",
+    "npm": "10.2.3"
+  },
+  "scripts": {
+    "setup": "npm run install:web && npm run install:mobile && npm run install:backend",
+    "install:web": "cd frontend-web && npm install",
+    "install:mobile": "cd frontend-mobile && npm install",
+    "install:backend": "cd backend && npm install",
+    "dev:web": "cd frontend-web && npm run dev",
+    "dev:mobile": "cd frontend-mobile && npm run dev",
+    "dev:backend": "cd backend && npm run dev"
+  }
+}
