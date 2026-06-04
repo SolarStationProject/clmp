@@ -1,7 +1,7 @@
-// Redirige a HU002 (login) si no hay sesión activa con el rol requerido
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getSession, Session } from './useSession';
+// Protege rutas según rol — check síncrono para evitar pantalla en blanco
+import React from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
+import { getSession } from './useSession';
 
 interface Props {
     rolRequerido: 'Administrador' | 'Ciudadano' | 'cualquiera';
@@ -9,25 +9,18 @@ interface Props {
 }
 
 export default function AuthGuard({ rolRequerido, children }: Props) {
-    const navigate = useNavigate();
-    const [sesion,   setSesion]   = useState<Session | null | 'cargando'>('cargando');
+    const location = useLocation();
+    const sesion   = getSession(); // síncrono — lee localStorage al instante
 
-    useEffect(() => {
-        const s = getSession();
+    // Sin sesión → login
+    if (!sesion) {
+        return <Navigate to="/demo/hu002" replace state={{ from: location.pathname }} />;
+    }
 
-        if (!s) {
-            navigate('/demo/hu002', { replace: true, state: { from: window.location.pathname } });
-            return;
-        }
+    // Rol incorrecto → login con aviso
+    if (rolRequerido !== 'cualquiera' && sesion.rol !== rolRequerido) {
+        return <Navigate to="/demo/hu002" replace state={{ from: location.pathname, rolRequerido }} />;
+    }
 
-        if (rolRequerido !== 'cualquiera' && s.rol !== rolRequerido) {
-            navigate('/demo/hu002', { replace: true, state: { from: window.location.pathname, rolRequerido } });
-            return;
-        }
-
-        setSesion(s);
-    }, []);
-
-    if (sesion === 'cargando') return null;
     return <>{children}</>;
 }
