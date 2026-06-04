@@ -104,7 +104,8 @@ export async function updatedEstadoReportesId(reporteId: string, nuevoEstado: Es
     return result.rows[0].estado;
 }
 
-export async function obtenerTodos(usuarioId: string, usuarioRol: RolUsuario): Promise<Reporte[]> {
+export async function obtenerTodos(_usuarioId: string, _usuarioRol: RolUsuario): Promise<Reporte[]> {
+    // Todos los usuarios autenticados ven todos los reportes en el mapa (HU005) y detalle (HU021)
     const result = await db.query<Reporte>(
         `SELECT
             id, ciudadano_id, codigo, titulo, descripcion, categoria, foto,
@@ -112,9 +113,7 @@ export async function obtenerTodos(usuarioId: string, usuarioRol: RolUsuario): P
             ST_Y(geom) AS latitud,
             ST_X(geom) AS longitud
          FROM reportes
-         WHERE ($1 = 'Administrador' OR ciudadano_id != $2::uuid)
-         ORDER BY fecha_creacion DESC`,
-        [usuarioRol, usuarioId]
+         ORDER BY fecha_creacion DESC`
     );
     return result.rows;
 }
