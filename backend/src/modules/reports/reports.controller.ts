@@ -72,7 +72,17 @@ export async function actualizarEstadoReporte(req: Request, res: Response): Prom
         const infoAntes = await reportsRepository.getReporteConCiudadano(reporteId);
         const estadoAnterior = infoAntes?.estado ?? 'Pendiente';
 
-        const estado = await reportsService.actualizarEstadoReporte(reporteId, nuevoEstado as EstadoReporte);
+        const adminId = req.usuario?.id!;
+        const estado  = await reportsService.actualizarEstadoReporte(reporteId, nuevoEstado as EstadoReporte);
+
+        // Registrar en historial público (validacion_reportes)
+        const mensajeHistorial = comentario || `Estado cambiado a ${nuevoEstado}`;
+        await reportsService.crearCambioHistorial(reporteId, adminId, nuevoEstado as EstadoReporte, mensajeHistorial);
+
+        // Guardar comentario interno si fue ingresado (solo visible para admins en HU021)
+        if (comentario?.trim()) {
+            await reportsRepository.insertComentarioInterno(reporteId, adminId, comentario.trim());
+        }
 
         res.status(200).json({
             success: true,
@@ -80,7 +90,7 @@ export async function actualizarEstadoReporte(req: Request, res: Response): Prom
             data:    { estado },
         });
 
-        // Enviar email al ciudadano con estado anterior correcto (no bloqueante)
+        // Email no bloqueante
         if (infoAntes) {
             emailService.enviarNotificacionCambioEstado(
                 infoAntes.ciudadano_email,

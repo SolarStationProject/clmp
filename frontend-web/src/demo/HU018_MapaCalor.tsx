@@ -84,10 +84,11 @@ export default function HU018_MapaCalor() {
 
         // Capa de calor vacía al inicio
         heatRef.current = (L as any).heatLayer([], {
-            radius:   30,
-            blur:     25,
-            maxZoom:  17,
-            gradient: { 0.2: '#3B82F6', 0.4: '#22C55E', 0.6: '#EAB308', 0.8: '#F97316', 1.0: '#EF4444' },
+            radius:     35,
+            blur:       20,
+            maxZoom:    17,
+            minOpacity: 0.4,
+            gradient:   { 0.0: '#60A5FA', 0.35: '#22C55E', 0.6: '#EAB308', 0.8: '#F97316', 1.0: '#EF4444' },
         }).addTo(mapa);
 
         mapRef.current = mapa;

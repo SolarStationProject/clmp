@@ -92,6 +92,18 @@ export async function getReporteConCiudadano(reporteId: string): Promise<{
     return result.rows[0] ?? null;
 }
 
+export async function insertComentarioInterno(
+    reporteId: string,
+    adminId: string,
+    comentario: string
+): Promise<void> {
+    await db.query(
+        `INSERT INTO comentarios_internos (reporte_id, admin_id, comentario)
+         VALUES ($1, $2, $3)`,
+        [reporteId, adminId, comentario]
+    );
+}
+
 export async function updatedEstadoReportesId(reporteId: string, nuevoEstado: EstadoReporte): Promise<string> {
     if (!ESTADOS_VALIDOS.includes(nuevoEstado)) {
         throw Object.assign(new Error(`Estado inválido: ${nuevoEstado}`), { status: 400 });
