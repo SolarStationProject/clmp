@@ -25,9 +25,21 @@ export async function registrar(
     // Código de 6 dígitos válido 60 minutos
     const codigo = String(Math.floor(100000 + Math.random() * 900000));
     await authRepository.guardarToken(email, codigo, 'registro', 60);
-    await emailService.enviarCodigoVerificacion(email, nombre, codigo);
 
-    return { mensaje: 'Código de verificación enviado al correo' };
+    // Envío de email no bloqueante — si falla, el usuario igual puede usar el código
+    let emailEnviado = true;
+    try {
+        await emailService.enviarCodigoVerificacion(email, nombre, codigo);
+    } catch (err: any) {
+        emailEnviado = false;
+        console.error('[Email] Error enviando código de verificación:', err.message);
+    }
+
+    return {
+        mensaje: emailEnviado
+            ? 'Código de verificación enviado al correo'
+            : `Cuenta creada. Email no disponible — código de verificación: ${codigo}`,
+    };
 }
 
 // ── HU001: Registro (paso 2 — verifica código y activa cuenta) ────────────────
