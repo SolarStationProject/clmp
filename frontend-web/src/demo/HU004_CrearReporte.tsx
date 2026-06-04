@@ -7,6 +7,7 @@ import { useRef, useState, useLayoutEffect } from 'react';
 import L from 'leaflet';
 import DemoShell, { SuccessMessage, Card, FormField, inputStyle, btnStyle } from './DemoShell';
 import { CATEGORIAS, BG_ESTADO, TEXT_ESTADO } from './mocks/data';
+import { getSession, API_BASE } from './useSession';
 
 const MAX_DESC    = 500;
 const MAX_FOTO_MB = 5;
@@ -24,9 +25,13 @@ export default function HU004_CrearReporte() {
     const markerRef   = useRef<L.Marker | null>(null);
     const circleRef   = useRef<L.Circle | null>(null);
 
+    const sesion = getSession();
+
     const [titulo,       setTitulo]       = useState('');
     const [descripcion,  setDescripcion]  = useState('');
     const [categoria,    setCategoria]    = useState('');
+    const [direccion,    setDireccion]    = useState('');
+    const [comuna,       setComuna]       = useState('');
     const [foto,         setFoto]         = useState<{ nombre: string; preview: string; tamanoMB: number } | null>(null);
     const [fotoError,    setFotoError]    = useState('');
     const [coords,       setCoords]       = useState<{ lat: number; lng: number; precision: number } | null>(null);
@@ -34,6 +39,7 @@ export default function HU004_CrearReporte() {
     const [gpsError,     setGpsError]     = useState('');
     const [ajustado,     setAjustado]     = useState(false);
     const [enviando,     setEnviando]     = useState(false);
+    const [errorEnvio,   setErrorEnvio]   = useState('');
     const [creado,       setCreado]       = useState<{ codigo: string } | null>(null);
 
     useLayoutEffect(() => {
@@ -143,19 +149,43 @@ export default function HU004_CrearReporte() {
         reader.readAsDataURL(file);
     };
 
-    const handleEnviar = (e: React.FormEvent) => {
+    const handleEnviar = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!coords) return;
+        if (!coords || !sesion) return;
         setEnviando(true);
-        setTimeout(() => {
-            setCreado({ codigo: `CLM-${new Date().getFullYear()}-${String(Date.now()).slice(-3)}` });
+        setErrorEnvio('');
+        try {
+            const res = await fetch(`${API_BASE}/api/reports/crear`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${sesion.token}`,
+                },
+                body: JSON.stringify({
+                    titulo,
+                    descripcion,
+                    categoria,
+                    direccion: direccion || `${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}`,
+                    comuna:    comuna    || 'Sin especificar',
+                    latitud:   coords.lat,
+                    longitud:  coords.lng,
+                    foto:      foto?.preview ?? null,
+                }),
+            });
+            const data = await res.json();
+            if (!res.ok) { setErrorEnvio(data.message || 'Error al crear el reporte.'); return; }
+            setCreado({ codigo: data.data?.codigo || 'CLM-NUEVO' });
+        } catch {
+            setErrorEnvio('No se pudo conectar con el servidor.');
+        } finally {
             setEnviando(false);
-        }, 1200);
+        }
     };
 
     const resetear = () => {
         setCreado(null); setTitulo(''); setDescripcion(''); setCategoria('');
-        setFoto(null); setCoords(null); setGpsEstado('idle'); setAjustado(false);
+        setDireccion(''); setComuna('');
+        setFoto(null); setCoords(null); setGpsEstado('idle'); setAjustado(false); setErrorEnvio('');
     };
 
     // ── Pantalla de éxito ──────────────────────────────────────────
@@ -248,6 +278,12 @@ export default function HU004_CrearReporte() {
                             {CATEGORIAS.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
                     </FormField>
+                    <FormField label="Dirección (opcional — se usa coordenadas si se omite)">
+                        <input style={inputStyle} type="text" value={direccion} onChange={e => setDireccion(e.target.value)} placeholder="Ej: Av. Principal 1234" />
+                    </FormField>
+                    <FormField label="Comuna (opcional)">
+                        <input style={inputStyle} type="text" value={comuna} onChange={e => setComuna(e.target.value)} placeholder="Ej: Providencia" />
+                    </FormField>
                 </Card>
 
                 {/* GPS + Mapa */}
@@ -311,6 +347,11 @@ export default function HU004_CrearReporte() {
                 >
                     {enviando ? '⏳ Enviando reporte…' : coords ? '📤 Enviar reporte' : 'Captura el GPS primero'}
                 </button>
+                {errorEnvio && (
+                    <div style={{ backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '10px', padding: '12px', marginTop: '10px', fontSize: '13px', color: '#DC2626' }}>
+                        ❌ {errorEnvio}
+                    </div>
+                )}
             </form>
         </DemoShell>
     );
