@@ -119,12 +119,13 @@ export async function crearReporte(req: Request, res: Response): Promise<void> {
         res.status(401).json({ success: false, message: 'No autorizado.' });
         return;
     }
-    const { titulo, descripcion, categoria, direccion, comuna, latitud, longitud } = req.body;
+    const { titulo, descripcion, categoria, direccion, comuna, latitud, longitud, foto: fotoBase64 } = req.body;
     if (!titulo || !descripcion || !categoria || !direccion || !comuna || !latitud || !longitud) {
         res.status(400).json({ success: false, message: 'Todos los campos son requeridos.' });
         return;
     }
-    const foto = req.file ? `/uploads/reports/${req.file.filename}` : undefined;
+    // Acepta foto como archivo multer (multipart) O como base64 en el body JSON
+    const foto = req.file ? `/uploads/reports/${req.file.filename}` : (fotoBase64 || undefined);
     try {
         const data = await reportsService.crearReporte({
             ciudadano_id: ciudadanoId,

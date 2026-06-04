@@ -91,13 +91,27 @@ export default function HU021_DetalleReporte() {
                 ) : detalle ? (
                     <>
                         <Card>
-                            {/* Foto placeholder */}
-                            <div style={{ backgroundColor: '#F1F5F9', borderRadius: '12px', height: '140px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '14px', border: '2px dashed #CBD5E1' }}>
-                                <div style={{ textAlign: 'center', color: '#94a3b8' }}>
-                                    <div style={{ fontSize: '28px' }}>📸</div>
-                                    <p style={{ fontSize: '12px', margin: '4px 0 0 0' }}>Fotografía de evidencia</p>
+                            {/* Foto real o placeholder */}
+                            {detalle.foto ? (
+                                <img
+                                    src={
+                                        detalle.foto.startsWith('data:')
+                                            ? detalle.foto
+                                            : detalle.foto.startsWith('http')
+                                                ? detalle.foto
+                                                : `${API_BASE}${detalle.foto}`
+                                    }
+                                    alt="Evidencia del reporte"
+                                    style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '12px', marginBottom: '14px' }}
+                                />
+                            ) : (
+                                <div style={{ backgroundColor: '#F1F5F9', borderRadius: '12px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '14px', border: '2px dashed #CBD5E1' }}>
+                                    <div style={{ textAlign: 'center', color: '#94a3b8' }}>
+                                        <div style={{ fontSize: '22px' }}>📸</div>
+                                        <p style={{ fontSize: '11px', margin: '2px 0 0 0' }}>Sin fotografía</p>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
                                 <div style={{ flex: 1 }}>
