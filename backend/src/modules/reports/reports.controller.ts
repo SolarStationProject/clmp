@@ -72,7 +72,7 @@ export async function actualizarEstadoReporte(req: Request, res: Response): Prom
         const infoAntes = await reportsRepository.getReporteConCiudadano(reporteId);
         const estadoAnterior = infoAntes?.estado ?? 'Pendiente';
 
-        const adminId = req.usuario?.id!;
+        const adminId = (req.usuario as { id: string }).id;
         const estado  = await reportsService.actualizarEstadoReporte(reporteId, nuevoEstado as EstadoReporte);
 
         // Registrar en historial público (validacion_reportes)
