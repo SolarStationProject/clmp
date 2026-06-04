@@ -2,7 +2,7 @@
 // Resultado esperado: "Estado del reporte visible con lo solicitado"
 import { useState, useEffect, useRef } from 'react';
 import DemoShell, { SuccessMessage, Card } from './DemoShell';
-import { getSession } from './useSession';
+import { getSession, API_BASE } from './useSession';
 
 type EstadoReporte = 'Pendiente' | 'En Proceso' | 'Resuelto' | 'Rechazado';
 
@@ -32,7 +32,7 @@ export default function HU010_EstadoReportes() {
         if (!sesion) return;
         if (!silencioso) setCargando(true);
         try {
-            const res  = await fetch(`/api/reports/my-reports?ciudadanoId=${sesion.uid}`, {
+            const res  = await fetch(`${API_BASE}/api/reports/my-reports?ciudadanoId=${sesion.uid}`, {
                 headers: { Authorization: `Bearer ${sesion.token}` },
             });
             const data = await res.json();
@@ -67,7 +67,7 @@ export default function HU010_EstadoReportes() {
         setMostrarExito(true);
         setCargandoDet(true);
         try {
-            const res  = await fetch(`/api/reports/${id}?id=${id}&usuarioRol=${sesion.rol}`, {
+            const res  = await fetch(`${API_BASE}/api/reports/${id}?id=${id}&usuarioRol=${sesion.rol}`, {
                 headers: { Authorization: `Bearer ${sesion.token}` },
             });
             const data: DetalleRes = await res.json();

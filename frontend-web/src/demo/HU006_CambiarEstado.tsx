@@ -3,7 +3,7 @@
 // Resultado esperado: "Estado actualizado y ciudadano notificado"
 import React, { useState, useEffect } from 'react';
 import DemoShell, { SuccessMessage, ErrorMessage, FormField, inputStyle, Card } from './DemoShell';
-import { getSession } from './useSession';
+import { getSession, API_BASE } from './useSession';
 
 type EstadoReporte = 'Pendiente' | 'En Proceso' | 'Resuelto' | 'Rechazado';
 const ESTADOS: EstadoReporte[] = ['Pendiente', 'En Proceso', 'Resuelto', 'Rechazado'];
@@ -29,7 +29,7 @@ export default function HU006_CambiarEstado() {
         if (!sesion) return;
         setCargando(true);
         try {
-            const res  = await fetch(`/api/reports/?usuarioId=${sesion.uid}&usuarioRol=${sesion.rol}`, {
+            const res  = await fetch(`${API_BASE}/api/reports/?usuarioId=${sesion.uid}&usuarioRol=${sesion.rol}`, {
                 headers: { Authorization: `Bearer ${sesion.token}` },
             });
             const data = await res.json();
@@ -48,7 +48,7 @@ export default function HU006_CambiarEstado() {
         setError('');
         setResultado('');
         try {
-            const res  = await fetch(`/api/reports/${reporte.id}/status`, {
+            const res  = await fetch(`${API_BASE}/api/reports/${reporte.id}/status`, {
                 method:  'PUT',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sesion.token}` },
                 body:    JSON.stringify({ nuevoEstado, comentario: comentario || undefined }),

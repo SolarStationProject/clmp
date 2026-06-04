@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getSession, clearSession } from './useSession';
+import { getSession, clearSession, API_BASE } from './useSession';
 
 interface Props {
     huId:       string;
@@ -58,7 +58,7 @@ export default function DemoShell({ huId, titulo, integrante, color, children }:
         setResetting(true);
         setConfirmReset(false);
         try {
-            const res = await fetch('/api/admin/reset-db', {
+            const res = await fetch(`${API_BASE}/api/admin/reset-db`, {
                 method: 'POST',
                 headers: { Authorization: `Bearer ${sesion.token}` },
             });

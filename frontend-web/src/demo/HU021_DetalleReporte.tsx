@@ -3,7 +3,7 @@
 // Resultado esperado: "Detalle completo del reporte visible"
 import { useState, useEffect } from 'react';
 import DemoShell, { SuccessMessage, Card } from './DemoShell';
-import { getSession } from './useSession';
+import { getSession, API_BASE } from './useSession';
 
 type EstadoReporte = 'Pendiente' | 'En Proceso' | 'Resuelto' | 'Rechazado';
 const COLOR: Record<EstadoReporte, string> = { 'Pendiente':'#EF4444','En Proceso':'#F59E0B','Resuelto':'#22C55E','Rechazado':'#6B7280' };
@@ -29,7 +29,7 @@ export default function HU021_DetalleReporte() {
 
     useEffect(() => {
         if (!sesion) return;
-        fetch(`/api/reports/?usuarioId=${sesion.uid}&usuarioRol=${sesion.rol}`, {
+        fetch(`${API_BASE}/api/reports/?usuarioId=${sesion.uid}&usuarioRol=${sesion.rol}`, {
             headers: { Authorization: `Bearer ${sesion.token}` },
         })
             .then(r => r.json())
@@ -44,7 +44,7 @@ export default function HU021_DetalleReporte() {
         setDetalle(null);
         setCargandoDet(true);
         try {
-            const res  = await fetch(`/api/reports/${id}?id=${id}&usuarioRol=${sesion.rol}`, {
+            const res  = await fetch(`${API_BASE}/api/reports/${id}?id=${id}&usuarioRol=${sesion.rol}`, {
                 headers: { Authorization: `Bearer ${sesion.token}` },
             });
             const data = await res.json();

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import DemoShell, { SuccessMessage, ErrorMessage, FormField, inputStyle, btnStyle, Card } from './DemoShell';
+import { API_BASE } from './useSession';
 
 type Paso = 'email' | 'enviado' | 'nueva' | 'exito';
 const PASSWORD_RE = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
@@ -28,7 +29,7 @@ export default function HU003_Recuperar() {
         setError('');
         setCargando(true);
         try {
-            const res  = await fetch('/api/auth/recover', {
+            const res  = await fetch(`${API_BASE}/api/auth/recover`, {
                 method:  'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body:    JSON.stringify({ email }),
@@ -50,7 +51,7 @@ export default function HU003_Recuperar() {
         if (nueva !== confirma)        { setError('Las contraseñas no coinciden.'); return; }
         setCargando(true);
         try {
-            const res  = await fetch('/api/auth/reset', {
+            const res  = await fetch(`${API_BASE}/api/auth/reset`, {
                 method:  'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body:    JSON.stringify({ token, nuevaPassword: nueva }),

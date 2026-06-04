@@ -1,3 +1,6 @@
+// URL base del backend — usa variable de entorno en producción, proxy en desarrollo
+export const API_BASE = import.meta.env.VITE_API_URL || '';
+
 // Hook centralizado de sesión — lee localStorage
 export interface Session {
     token:  string;

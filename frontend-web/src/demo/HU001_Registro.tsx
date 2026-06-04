@@ -2,6 +2,7 @@
 // Resultado esperado: "Cuenta creada exitosamente"
 import React, { useState } from 'react';
 import DemoShell, { SuccessMessage, ErrorMessage, FormField, inputStyle, btnStyle, Card } from './DemoShell';
+import { API_BASE } from './useSession';
 
 type Paso = 'formulario' | 'verificacion' | 'exito';
 const PASSWORD_RE = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
@@ -28,7 +29,7 @@ export default function HU001_Registro() {
 
         setCargando(true);
         try {
-            const res  = await fetch('/api/auth/register', {
+            const res  = await fetch(`${API_BASE}/api/auth/register`, {
                 method:  'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body:    JSON.stringify({ nombre, email, password }),
@@ -48,7 +49,7 @@ export default function HU001_Registro() {
         setError('');
         setCargando(true);
         try {
-            const res  = await fetch('/api/auth/verify-email', {
+            const res  = await fetch(`${API_BASE}/api/auth/verify-email`, {
                 method:  'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body:    JSON.stringify({ email, codigo }),

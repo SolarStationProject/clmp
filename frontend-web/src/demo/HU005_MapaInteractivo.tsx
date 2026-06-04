@@ -4,7 +4,7 @@ import React, { useRef, useState, useLayoutEffect, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import L from 'leaflet';
 import DemoShell, { SuccessMessage, Card } from './DemoShell';
-import { getSession } from './useSession';
+import { getSession, API_BASE } from './useSession';
 
 type EstadoReporte = 'Pendiente' | 'En Proceso' | 'Resuelto' | 'Rechazado';
 type FiltroEstado  = 'Todos' | EstadoReporte;
@@ -36,7 +36,7 @@ export default function HU005_MapaInteractivo() {
     // Cargar reportes desde la API
     useEffect(() => {
         if (!sesion) return;
-        fetch(`/api/reports/?usuarioId=${sesion.uid}&usuarioRol=${sesion.rol}`, {
+        fetch(`${API_BASE}/api/reports/?usuarioId=${sesion.uid}&usuarioRol=${sesion.rol}`, {
             headers: { Authorization: `Bearer ${sesion.token}` },
         })
             .then(r => r.json())

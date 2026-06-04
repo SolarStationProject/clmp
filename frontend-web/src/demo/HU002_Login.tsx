@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import DemoShell, { SuccessMessage, ErrorMessage, FormField, inputStyle, btnStyle, Card } from './DemoShell';
-import { getSession, clearSession } from './useSession';
+import { getSession, clearSession, API_BASE } from './useSession';
 import { detectarPlataforma, labelPlataforma } from './usePlataforma';
 
 export default function HU002_Login() {
@@ -33,7 +33,7 @@ export default function HU002_Login() {
         setError('');
         setCargando(true);
         try {
-            const res  = await fetch('/api/auth/login', {
+            const res  = await fetch(`${API_BASE}/api/auth/login`, {
                 method:  'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body:    JSON.stringify({ email, password, plataforma }),
