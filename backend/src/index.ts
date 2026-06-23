@@ -7,11 +7,16 @@ import authRoutes    from './modules/auth/auth.routes';
 import reportsRoutes from './modules/reports/reports.routes';
 import heatmapRoutes from './modules/heatmap/heatmap.routes';
 import adminRoutes   from './modules/admin/admin.routes';
+import { db }        from './config/database';
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
 globalMiddlewares(app);
+
+// Migración idempotente: columna eliminado en reportes
+db.query(`ALTER TABLE reportes ADD COLUMN IF NOT EXISTS eliminado BOOLEAN DEFAULT FALSE`)
+    .catch(e => console.warn('[Migration] eliminado column:', e.message));
 
 app.get('/', (_req, res) => res.json({ status: 'ok', servicio: 'CleanMap API', version: '1.0.0' }));
 

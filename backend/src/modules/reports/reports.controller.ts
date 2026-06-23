@@ -4,16 +4,52 @@ import * as reportsRepository from './reports.repository';
 import * as emailService from '../../services/email.service';
 import { EstadoReporte, RolUsuario } from '../../shared/types';
 
-// HU010: Lista de reportes propios del ciudadano
+// HU010/HU023: Lista de reportes propios del ciudadano
 export async function getReportesPropios(req: Request, res: Response): Promise<void> {
-    const { ciudadanoId } = req.query;
+    const { ciudadanoId, incluirEliminados } = req.query;
     if (!ciudadanoId) {
         res.status(200).json({ success: true, data: [] });
         return;
     }
     try {
-        const data = await reportsService.getReportesPropios(ciudadanoId as string);
+        const data = await reportsRepository.findByOwnReportesId(
+            ciudadanoId as string,
+            incluirEliminados === 'true'
+        );
         res.status(200).json({ success: true, data });
+    } catch (err: any) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+}
+
+// HU019: Editar reporte en estado Pendiente
+export async function editarReporte(req: Request, res: Response): Promise<void> {
+    const { reporteId } = req.params;
+    const ciudadanoId   = req.usuario!.id;
+    const { titulo, descripcion, categoria, foto } = req.body;
+    try {
+        const data = await reportsRepository.editarReporte(reporteId, ciudadanoId, { titulo, descripcion, categoria, foto });
+        if (!data) {
+            res.status(404).json({ success: false, message: 'Reporte no encontrado o no está en estado Pendiente.' });
+            return;
+        }
+        res.status(200).json({ success: true, mensaje: 'Reporte actualizado', data });
+    } catch (err: any) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+}
+
+// HU020: Eliminar reporte (soft delete)
+export async function eliminarReporte(req: Request, res: Response): Promise<void> {
+    const { reporteId } = req.params;
+    const ciudadanoId   = req.usuario!.id;
+    try {
+        const ok = await reportsRepository.eliminarReporte(reporteId, ciudadanoId);
+        if (!ok) {
+            res.status(404).json({ success: false, message: 'Reporte no encontrado o no está en estado Pendiente.' });
+            return;
+        }
+        res.status(200).json({ success: true, mensaje: 'Reporte eliminado correctamente.' });
     } catch (err: any) {
         res.status(500).json({ success: false, message: err.message });
     }

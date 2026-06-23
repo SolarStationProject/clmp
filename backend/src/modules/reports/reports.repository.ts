@@ -3,21 +3,60 @@ import { Reporte, DetalleReporteResponse, ValidacionReporte, EstadoReporte, RolU
 
 const ESTADOS_VALIDOS: EstadoReporte[] = ['Pendiente', 'En Proceso', 'Resuelto', 'Rechazado'];
 
-export async function findByOwnReportesId(ciudadanoId: string): Promise<Reporte[]> {
+export async function findByOwnReportesId(ciudadanoId: string, incluirEliminados = false): Promise<Reporte[]> {
     const result = await db.query<Reporte>(
         `SELECT
             r.id, r.ciudadano_id, r.codigo, r.titulo, r.descripcion, r.categoria, r.foto,
             r.fecha_creacion::text AS fecha_creacion, r.estado, r.direccion, r.comuna,
+            COALESCE(r.eliminado, false) AS eliminado,
             ST_Y(r.geom) AS latitud,
             ST_X(r.geom) AS longitud,
             u.nombre, u.rol
          FROM reportes r
          INNER JOIN usuarios u ON r.ciudadano_id = u.id
          WHERE r.ciudadano_id = $1
+           AND ($2 OR COALESCE(r.eliminado, false) = false)
          ORDER BY r.fecha_creacion DESC`,
-        [ciudadanoId]
+        [ciudadanoId, incluirEliminados]
     );
     return result.rows;
+}
+
+export async function editarReporte(
+    reporteId: string,
+    ciudadanoId: string,
+    datos: { titulo?: string; descripcion?: string; categoria?: string; foto?: string }
+): Promise<Reporte | null> {
+    const result = await db.query<Reporte>(
+        `UPDATE reportes
+         SET titulo      = COALESCE($3, titulo),
+             descripcion = COALESCE($4, descripcion),
+             categoria   = COALESCE($5, categoria),
+             foto        = COALESCE($6, foto)
+         WHERE id = $1
+           AND ciudadano_id = $2
+           AND estado = 'Pendiente'
+           AND COALESCE(eliminado, false) = false
+         RETURNING
+            id, ciudadano_id, codigo, titulo, descripcion, categoria, foto,
+            fecha_creacion::text AS fecha_creacion, estado, direccion, comuna,
+            ST_Y(geom) AS latitud, ST_X(geom) AS longitud`,
+        [reporteId, ciudadanoId, datos.titulo ?? null, datos.descripcion ?? null, datos.categoria ?? null, datos.foto ?? null]
+    );
+    return result.rows[0] ?? null;
+}
+
+export async function eliminarReporte(reporteId: string, ciudadanoId: string): Promise<boolean> {
+    const result = await db.query(
+        `UPDATE reportes
+         SET eliminado = true
+         WHERE id = $1
+           AND ciudadano_id = $2
+           AND estado = 'Pendiente'
+           AND COALESCE(eliminado, false) = false`,
+        [reporteId, ciudadanoId]
+    );
+    return (result.rowCount ?? 0) > 0;
 }
 
 export async function findDetailsByReporteId(reporteId: string): Promise<DetalleReporteResponse | null> {

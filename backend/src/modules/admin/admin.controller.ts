@@ -39,6 +39,9 @@ const ADMIN_ID = 'a0000000-0000-0000-0000-000000000001';
 export async function resetDatabase(_req: Request, res: Response): Promise<void> {
     const client = await db.connect();
     try {
+        // Asegurar columna eliminado (migración idempotente)
+        await client.query(`ALTER TABLE reportes ADD COLUMN IF NOT EXISTS eliminado BOOLEAN DEFAULT FALSE`);
+
         // Eliminar todo excepto el admin
         await client.query(`
             TRUNCATE TABLE comentarios_internos, validacion_reportes, notificaciones,

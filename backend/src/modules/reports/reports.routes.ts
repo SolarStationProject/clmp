@@ -6,6 +6,8 @@ import {
     actualizarEstadoReporte,
     obtenerReportes,
     crearReporte,
+    editarReporte,
+    eliminarReporte,
 } from './reports.controller';
 import { soloAdministrador, soloCiudadano } from '../../middlewares';
 import { upload } from '../../middlewares';
@@ -18,6 +20,12 @@ router.get('/:id',        getDetalleReporte);
 
 // HU004: Crear reporte (solo Ciudadano, con foto opcional)
 router.post('/crear', soloCiudadano, upload.single('foto'), crearReporte);
+
+// HU019: Editar reporte (solo Ciudadano dueño, solo si Pendiente)
+router.put('/:reporteId/editar',   soloCiudadano, upload.single('foto'), editarReporte);
+
+// HU020: Eliminar reporte soft delete (solo Ciudadano dueño, solo si Pendiente)
+router.delete('/:reporteId',       soloCiudadano, eliminarReporte);
 
 // HU006: Operaciones de administración (solo Administrador)
 router.post('/:reporteId/history', soloAdministrador, crearCambioHistorial);
