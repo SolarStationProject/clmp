@@ -14,8 +14,10 @@ const HUS = [
     { id: 'HU010', ruta: '/demo/hu010', integrante: 'Julián',     color: '#D97706', bg: '#FFFBEB', titulo: 'Consultar Estado de Reportes',    descripcion: 'Lista de mis reportes con historial de cambios y notificaciones de estado.' },
     { id: 'HU018', ruta: '/demo/hu018', integrante: 'Martín',     color: '#6D28D9', bg: '#FAF5FF', titulo: 'Indicadores Ambientales por Zona','descripcion': 'Mapa de calor de microbasurales, zonas críticas y exportación CSV.' },
     { id: 'HU021', ruta: '/demo/hu021', integrante: 'Julián',     color: '#D97706', bg: '#FFFBEB', titulo: 'Consultar Detalles de Reporte',   descripcion: 'Detalle completo: foto, descripción, ubicación, historial. Admin ve notas internas.' },
+    { id: 'HU012', ruta: '/demo/hu012', integrante: 'Jaime',      color: '#0F766E', bg: '#F0FDFA', titulo: 'Límite por Comuna (Providencia)',   descripcion: 'Solo se aceptan reportes dentro de Providencia. Validación con PostGIS bounding box.' },
     { id: 'HU019', ruta: '/demo/hu019', integrante: 'Julián',     color: '#7C3AED', bg: '#F5F3FF', titulo: 'Editar Reporte',                   descripcion: 'Ciudadano edita título, descripción, categoría y foto de reportes en estado Pendiente.' },
     { id: 'HU020', ruta: '/demo/hu020', integrante: 'Julián',     color: '#DC2626', bg: '#FEF2F2', titulo: 'Eliminar Reporte',                 descripcion: 'Soft delete de reportes en estado Pendiente con confirmación en dos pasos.' },
+    { id: 'HU022', ruta: '/demo/hu022', integrante: 'Jaime',      color: '#7C3AED', bg: '#F5F3FF', titulo: 'Detección de Duplicados',          descripcion: 'PostGIS ST_DWithin detecta reportes existentes a menos de 50m antes de crear uno nuevo.' },
     { id: 'HU023', ruta: '/demo/hu023', integrante: 'Julián',     color: '#0284C7', bg: '#F0F9FF', titulo: 'Historial de Reportes',            descripcion: 'Historial paginado (20/pág) con filtros por estado y ordenamiento.' },
 ];
 
@@ -51,7 +53,7 @@ export default function DemoIndex() {
             {/* Contador */}
             <div style={{ maxWidth: '960px', margin: '-28px auto 0', padding: '0 16px' }}>
                 <div style={{ backgroundColor: '#fff', borderRadius: '16px', padding: '16px', display: 'flex', justifyContent: 'space-around', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', marginBottom: '32px' }}>
-                    {[['15', 'Historias de usuario'], ['6', 'Integrantes'], ['3', 'Módulos'], ['2', 'Plataformas']].map(([n, label]) => (
+                    {[['17', 'Historias de usuario'], ['6', 'Integrantes'], ['3', 'Módulos'], ['2', 'Plataformas']].map(([n, label]) => (
                         <div key={label} style={{ textAlign: 'center' }}>
                             <p style={{ fontSize: '28px', fontWeight: '800', color: '#005c2e', margin: 0 }}>{n}</p>
                             <p style={{ fontSize: '12px', color: '#64748b', margin: '2px 0 0 0' }}>{label}</p>

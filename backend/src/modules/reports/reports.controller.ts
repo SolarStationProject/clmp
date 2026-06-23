@@ -172,19 +172,73 @@ export async function crearReporte(req: Request, res: Response): Promise<void> {
     }
     // Acepta foto como archivo multer (multipart) O como base64 en el body JSON
     const foto = req.file ? `/uploads/reports/${req.file.filename}` : (fotoBase64 || undefined);
+    const lat = parseFloat(latitud);
+    const lng = parseFloat(longitud);
     try {
+        // HU012: Validar que las coordenadas estén dentro de Providencia
+        const dentroProvidencia = await reportsRepository.verificarDentroProvidencia(lat, lng);
+        if (!dentroProvidencia) {
+            res.status(400).json({ success: false, message: 'CleanMap solo acepta reportes dentro de la comuna de Providencia.' });
+            return;
+        }
+
+        // HU022: Verificar duplicados a 50m (saltar si el ciudadano confirma forzar)
+        if (!req.body.forzar) {
+            const duplicados = await reportsRepository.checkDuplicados(lat, lng);
+            if (duplicados.length > 0) {
+                res.status(409).json({
+                    success: false,
+                    message: `Hay ${duplicados.length} reporte(s) existente(s) a menos de 50 metros.`,
+                    duplicados,
+                });
+                return;
+            }
+        }
+
         const data = await reportsService.crearReporte({
             ciudadano_id: ciudadanoId,
             titulo, descripcion, categoria,
             foto, direccion, comuna,
-            latitud:  parseFloat(latitud),
-            longitud: parseFloat(longitud),
+            latitud:  lat,
+            longitud: lng,
         });
         res.status(201).json({
             success: true,
             mensaje: 'Reporte creado con estado Pendiente',
             data,
         });
+    } catch (err: any) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+}
+
+// HU012: Verificar si coordenadas están dentro de Providencia
+export async function checkComuna(req: Request, res: Response): Promise<void> {
+    const lat = parseFloat(req.query.lat as string);
+    const lng = parseFloat(req.query.lng as string);
+    if (isNaN(lat) || isNaN(lng)) {
+        res.status(400).json({ success: false, message: 'Coordenadas inválidas.' });
+        return;
+    }
+    try {
+        const dentro = await reportsRepository.verificarDentroProvidencia(lat, lng);
+        res.status(200).json({ success: true, dentro, mensaje: dentro ? 'Dentro de Providencia' : 'Fuera de Providencia' });
+    } catch (err: any) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+}
+
+// HU022: Verificar duplicados a 50m
+export async function checkDuplicado(req: Request, res: Response): Promise<void> {
+    const lat = parseFloat(req.query.lat as string);
+    const lng = parseFloat(req.query.lng as string);
+    if (isNaN(lat) || isNaN(lng)) {
+        res.status(400).json({ success: false, message: 'Coordenadas inválidas.' });
+        return;
+    }
+    try {
+        const duplicados = await reportsRepository.checkDuplicados(lat, lng);
+        res.status(200).json({ success: true, duplicados, hayDuplicados: duplicados.length > 0 });
     } catch (err: any) {
         res.status(500).json({ success: false, message: err.message });
     }

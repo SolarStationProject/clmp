@@ -169,6 +169,42 @@ export async function obtenerTodos(_usuarioId: string, _usuarioRol: RolUsuario):
     return result.rows;
 }
 
+// HU012: Verificar si coordenadas están dentro de Providencia (bounding box PostGIS)
+export async function verificarDentroProvidencia(lat: number, lng: number): Promise<boolean> {
+    const result = await db.query<{ dentro: boolean }>(
+        `SELECT ST_Contains(
+            ST_MakeEnvelope(-70.638, -33.452, -70.589, -33.407, 4326),
+            ST_SetSRID(ST_MakePoint($2, $1), 4326)
+        ) AS dentro`,
+        [lat, lng]
+    );
+    return result.rows[0]?.dentro ?? false;
+}
+
+// HU022: Detectar reportes existentes a menos de 50 metros
+export async function checkDuplicados(lat: number, lng: number): Promise<Array<{
+    id: string; codigo: string; titulo: string; categoria: string; estado: string; distancia_metros: number;
+}>> {
+    const result = await db.query(
+        `SELECT r.id, r.codigo, r.titulo, r.categoria, r.estado,
+                ROUND(ST_Distance(
+                    r.geom::geography,
+                    ST_SetSRID(ST_MakePoint($2, $1), 4326)::geography
+                )::numeric, 1) AS distancia_metros
+         FROM reportes r
+         WHERE ST_DWithin(
+                   r.geom::geography,
+                   ST_SetSRID(ST_MakePoint($2, $1), 4326)::geography,
+                   50
+               )
+           AND COALESCE(r.eliminado, false) = false
+         ORDER BY distancia_metros
+         LIMIT 5`,
+        [lat, lng]
+    );
+    return result.rows;
+}
+
 // HU004: Crear reporte con foto y GPS
 export async function insertReport(data: {
     ciudadano_id: string;

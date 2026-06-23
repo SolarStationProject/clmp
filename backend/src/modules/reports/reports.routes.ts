@@ -8,15 +8,19 @@ import {
     crearReporte,
     editarReporte,
     eliminarReporte,
+    checkComuna,
+    checkDuplicado,
 } from './reports.controller';
 import { soloAdministrador, soloCiudadano } from '../../middlewares';
 import { upload } from '../../middlewares';
 
 const router = Router();
 
-router.get('/my-reports', getReportesPropios);
-router.get('/',           obtenerReportes);
-router.get('/:id',        getDetalleReporte);
+router.get('/my-reports',      getReportesPropios);
+router.get('/check-comuna',    checkComuna);
+router.get('/check-duplicado', checkDuplicado);
+router.get('/',                obtenerReportes);
+router.get('/:id',             getDetalleReporte);
 
 // HU004: Crear reporte (solo Ciudadano, con foto opcional)
 router.post('/crear', soloCiudadano, upload.single('foto'), crearReporte);

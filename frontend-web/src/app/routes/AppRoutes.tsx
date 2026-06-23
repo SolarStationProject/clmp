@@ -12,8 +12,10 @@ const HU007 = lazy(() => import('../../demo/HU007_ControlAcceso'));
 const HU004 = lazy(() => import('../../demo/HU004_CrearReporte'));
 const HU009 = lazy(() => import('../../demo/HU009_GPS'));
 const HU010 = lazy(() => import('../../demo/HU010_EstadoReportes'));
+const HU012 = lazy(() => import('../../demo/HU012_LimiteComuna'));
 const HU019 = lazy(() => import('../../demo/HU019_EditarReporte'));
 const HU020 = lazy(() => import('../../demo/HU020_EliminarReporte'));
+const HU022 = lazy(() => import('../../demo/HU022_DeteccionDuplicados'));
 const HU023 = lazy(() => import('../../demo/HU023_HistorialReportes'));
 
 // Administrador
@@ -53,8 +55,10 @@ export default function AppRoutes() {
                 <Route path="/demo/hu004" element={<AuthGuard rolRequerido="Ciudadano"><HU004 /></AuthGuard>} />
                 <Route path="/demo/hu009" element={<AuthGuard rolRequerido="Ciudadano"><HU009 /></AuthGuard>} />
                 <Route path="/demo/hu010" element={<AuthGuard rolRequerido="Ciudadano"><HU010 /></AuthGuard>} />
+                <Route path="/demo/hu012" element={<AuthGuard rolRequerido="Ciudadano"><HU012 /></AuthGuard>} />
                 <Route path="/demo/hu019" element={<AuthGuard rolRequerido="Ciudadano"><HU019 /></AuthGuard>} />
                 <Route path="/demo/hu020" element={<AuthGuard rolRequerido="Ciudadano"><HU020 /></AuthGuard>} />
+                <Route path="/demo/hu022" element={<AuthGuard rolRequerido="Ciudadano"><HU022 /></AuthGuard>} />
                 <Route path="/demo/hu023" element={<AuthGuard rolRequerido="Ciudadano"><HU023 /></AuthGuard>} />
 
                 {/* Administrador */}
