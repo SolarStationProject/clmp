@@ -16,7 +16,14 @@ const fmtH = (s: string) => { const d = new Date(s); return `${d.getHours().toSt
 interface Reporte { id: string; codigo: string; titulo: string; estado: EstadoReporte; direccion: string; comuna: string; descripcion?: string; categoria?: string; fecha_creacion: string; foto?: string; }
 interface Historial { id: string; estado_asignado: EstadoReporte; comentario: string; fecha: string; usuario_nombre?: string; }
 interface ComentarioInterno { id: string; comentario: string; admin_nombre?: string; fecha_creacion: string; }
-interface Detalle extends Reporte { historial_cambios: Historial[]; comentarios_internos?: ComentarioInterno[]; }
+interface Detalle extends Reporte { historial_cambios: Historial[]; comentarios_internos?: ComentarioInterno[]; verificado_admin?: boolean; confirmaciones?: number; }
+
+const NIVEL_CREDIBILIDAD = (confirmaciones: number, verificado: boolean) => {
+    if (verificado && confirmaciones >= 5) return { label: '🟢 Alta credibilidad',   color: '#16A34A', bg: '#F0FDF4' };
+    if (verificado || confirmaciones >= 3) return { label: '🟠 Media credibilidad',  color: '#D97706', bg: '#FFFBEB' };
+    if (confirmaciones >= 1)               return { label: '🟡 Baja credibilidad',   color: '#CA8A04', bg: '#FEFCE8' };
+    return                                        { label: '⚪ Sin validar',          color: '#94A3B8', bg: '#F8FAFC' };
+};
 
 export default function HU021_DetalleReporte() {
     const sesion = getSession();
@@ -131,6 +138,40 @@ export default function HU021_DetalleReporte() {
                                 </div>
                             )}
                         </Card>
+
+                        {/* Credibilidad */}
+                        {(() => {
+                            const conf = detalle.confirmaciones ?? 0;
+                            const verif = detalle.verificado_admin ?? false;
+                            const cred = NIVEL_CREDIBILIDAD(conf, verif);
+                            return (
+                                <Card>
+                                    <h3 style={{ fontSize: '13px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 12px 0' }}>Credibilidad del reporte</h3>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', backgroundColor: cred.bg, borderRadius: '10px', padding: '10px 14px' }}>
+                                            <span style={{ fontSize: '15px', fontWeight: '800', color: cred.color }}>{cred.label}</span>
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                                            <div style={{ backgroundColor: '#F0FDF4', borderRadius: '10px', padding: '10px', textAlign: 'center', border: '1px solid #BBF7D0' }}>
+                                                <p style={{ fontSize: '18px', margin: '0 0 2px' }}>🤖</p>
+                                                <p style={{ fontSize: '11px', fontWeight: '700', color: '#16A34A', margin: '0 0 1px' }}>Imagga AI</p>
+                                                <p style={{ fontSize: '10px', color: '#64748B', margin: 0 }}>Foto verificada</p>
+                                            </div>
+                                            <div style={{ backgroundColor: verif ? '#F0FDF4' : '#F8FAFC', borderRadius: '10px', padding: '10px', textAlign: 'center', border: `1px solid ${verif ? '#BBF7D0' : '#E2E8F0'}` }}>
+                                                <p style={{ fontSize: '18px', margin: '0 0 2px' }}>{verif ? '✅' : '⏳'}</p>
+                                                <p style={{ fontSize: '11px', fontWeight: '700', color: verif ? '#16A34A' : '#94A3B8', margin: '0 0 1px' }}>Municipio</p>
+                                                <p style={{ fontSize: '10px', color: '#64748B', margin: 0 }}>{verif ? 'Verificado' : 'Pendiente'}</p>
+                                            </div>
+                                            <div style={{ backgroundColor: conf > 0 ? '#FFFBEB' : '#F8FAFC', borderRadius: '10px', padding: '10px', textAlign: 'center', border: `1px solid ${conf > 0 ? '#FDE68A' : '#E2E8F0'}` }}>
+                                                <p style={{ fontSize: '18px', margin: '0 0 2px' }}>👥</p>
+                                                <p style={{ fontSize: '11px', fontWeight: '700', color: conf > 0 ? '#D97706' : '#94A3B8', margin: '0 0 1px' }}>{conf} vecinos</p>
+                                                <p style={{ fontSize: '10px', color: '#64748B', margin: 0 }}>Confirmaron</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Card>
+                            );
+                        })()}
 
                         {/* Historial */}
                         <Card>

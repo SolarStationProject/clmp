@@ -66,6 +66,8 @@ export async function findDetailsByReporteId(reporteId: string): Promise<Detalle
             r.fecha_creacion::text AS fecha_creacion, r.estado, r.direccion, r.comuna,
             ST_Y(r.geom) AS latitud,
             ST_X(r.geom) AS longitud,
+            COALESCE(r.verificado_admin, false) AS verificado_admin,
+            (SELECT COUNT(*)::int FROM confirmaciones_reporte cr WHERE cr.reporte_id = r.id) AS confirmaciones,
             COALESCE((
                 SELECT json_agg(json_build_object(
                     'id',              v.id,

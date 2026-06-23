@@ -53,8 +53,10 @@ export interface ComentarioInterno {
 }
 
 export interface DetalleReporteResponse extends Reporte {
-    historial_cambios:    ValidacionReporte[];
+    historial_cambios:     ValidacionReporte[];
     comentarios_internos?: ComentarioInterno[];
+    verificado_admin?:     boolean;
+    confirmaciones?:       number;
 }
 
 export interface Notificacion {
