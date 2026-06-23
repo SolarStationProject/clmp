@@ -2,6 +2,9 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import AuthGuard from '../../demo/AuthGuard';
 
+// Menú principal
+const DemoIndex = lazy(() => import('../../demo/DemoIndex'));
+
 // Públicas (sin auth)
 const HU001 = lazy(() => import('../../demo/HU001_Registro'));
 const HU002 = lazy(() => import('../../demo/HU002_Login'));
@@ -42,8 +45,8 @@ export default function AppRoutes() {
     return (
         <Suspense fallback={<Loader />}>
             <Routes>
-                <Route path="/"           element={<Navigate to="/demo/hu002" replace />} />
-                <Route path="/demo"       element={<Navigate to="/demo/hu002" replace />} />
+                <Route path="/"           element={<Navigate to="/demo" replace />} />
+                <Route path="/demo"       element={<DemoIndex />} />
 
                 {/* Públicas */}
                 <Route path="/demo/hu001" element={<HU001 />} />

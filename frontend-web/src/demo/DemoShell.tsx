@@ -25,8 +25,14 @@ const NAV_ITEMS = [
     { id: 'HU007', ruta: '/demo/hu007', integrante: 'Alex'    },
     { id: 'HU009', ruta: '/demo/hu009', integrante: 'Jaime'   },
     { id: 'HU010', ruta: '/demo/hu010', integrante: 'Julián'  },
+    { id: 'HU012', ruta: '/demo/hu012', integrante: 'Jaime'   },
+    { id: 'HU016', ruta: '/demo/hu016', integrante: 'Alex'    },
     { id: 'HU018', ruta: '/demo/hu018', integrante: 'Martín'  },
+    { id: 'HU019', ruta: '/demo/hu019', integrante: 'Julián'  },
+    { id: 'HU020', ruta: '/demo/hu020', integrante: 'Julián'  },
     { id: 'HU021', ruta: '/demo/hu021', integrante: 'Julián'  },
+    { id: 'HU022', ruta: '/demo/hu022', integrante: 'Jaime'   },
+    { id: 'HU023', ruta: '/demo/hu023', integrante: 'Julián'  },
 ];
 
 // Altura fija de la barra nav para que el contenido no quede tapado
@@ -87,8 +93,8 @@ export default function DemoShell({ huId, titulo, integrante, color, children }:
                 scrollbarWidth:  'none',
                 boxShadow:       '0 2px 8px rgba(0,0,0,0.25)',
             }}>
-                {/* Logo CleanMap */}
-                <span style={{ fontSize: '15px', fontWeight: '800', color: '#22c55e', marginRight: '8px', flexShrink: 0, letterSpacing: '-0.3px' }}>
+                {/* Logo CleanMap — click lleva al índice de HUs */}
+                <span onClick={() => navigate('/demo')} style={{ fontSize: '15px', fontWeight: '800', color: '#22c55e', marginRight: '8px', flexShrink: 0, letterSpacing: '-0.3px', cursor: 'pointer' }}>
                     🗺️ CM
                 </span>
 
