@@ -9,6 +9,7 @@ const HUS = [
     { id: 'HU005', ruta: '/demo/hu005', integrante: 'William',    color: '#059669', bg: '#ECFDF5', titulo: 'Mapa Interactivo de Reportes',    descripcion: 'Marcadores de colores por estado, click para ver detalle, zoom y filtros.' },
     { id: 'HU006', ruta: '/demo/hu006', integrante: 'Alex',       color: '#DC2626', bg: '#FEF2F2', titulo: 'Cambiar Estado de Reportes',      descripcion: 'Admin selecciona reporte, cambia estado y notifica al ciudadano en < 30 s.' },
     { id: 'HU007', ruta: '/demo/hu007', integrante: 'Alex',       color: '#DC2626', bg: '#FEF2F2', titulo: 'Control de Acceso por Plataforma','descripcion': 'Admin solo en web, ciudadano solo en móvil. Roles con JWT.' },
+    { id: 'HU016', ruta: '/demo/hu016', integrante: 'Alex',       color: '#0369A1', bg: '#EFF6FF', titulo: 'Notificaciones por Email',         descripcion: 'Email automático al ciudadano cuando el admin cambia el estado de su reporte.' },
     { id: 'HU009', ruta: '/demo/hu009', integrante: 'Jaime',      color: '#0EA5E9', bg: '#F0F9FF', titulo: 'Geolocalización Automática GPS',  descripcion: 'Captura coordenadas, muestra marcador en mapa y alerta si precisión > 50m.' },
     { id: 'HU010', ruta: '/demo/hu010', integrante: 'Julián',     color: '#D97706', bg: '#FFFBEB', titulo: 'Consultar Estado de Reportes',    descripcion: 'Lista de mis reportes con historial de cambios y notificaciones de estado.' },
     { id: 'HU018', ruta: '/demo/hu018', integrante: 'Martín',     color: '#6D28D9', bg: '#FAF5FF', titulo: 'Indicadores Ambientales por Zona','descripcion': 'Mapa de calor de microbasurales, zonas críticas y exportación CSV.' },
@@ -50,7 +51,7 @@ export default function DemoIndex() {
             {/* Contador */}
             <div style={{ maxWidth: '960px', margin: '-28px auto 0', padding: '0 16px' }}>
                 <div style={{ backgroundColor: '#fff', borderRadius: '16px', padding: '16px', display: 'flex', justifyContent: 'space-around', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', marginBottom: '32px' }}>
-                    {[['14', 'Historias de usuario'], ['6', 'Integrantes'], ['3', 'Módulos'], ['2', 'Plataformas']].map(([n, label]) => (
+                    {[['15', 'Historias de usuario'], ['6', 'Integrantes'], ['3', 'Módulos'], ['2', 'Plataformas']].map(([n, label]) => (
                         <div key={label} style={{ textAlign: 'center' }}>
                             <p style={{ fontSize: '28px', fontWeight: '800', color: '#005c2e', margin: 0 }}>{n}</p>
                             <p style={{ fontSize: '12px', color: '#64748b', margin: '2px 0 0 0' }}>{label}</p>

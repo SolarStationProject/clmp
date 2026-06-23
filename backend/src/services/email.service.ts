@@ -5,6 +5,11 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY || '');
 const FROM     = process.env.EMAIL_FROM    || 'noreply@cleanmap.cl';
 const BASE_URL = process.env.FRONTEND_URL  || 'http://localhost:5173';
 
+// Emails de usuarios demo/seed — nunca enviar emails reales para no gastar créditos SendGrid
+function esDemoEmail(email: string): boolean {
+    return email.endsWith('@ciudadano.cl') || email === 'admin@cleanmapp.cl';
+}
+
 // ── Estilos base ─────────────────────────────────────────────────────────────
 const card   = `max-width:520px;margin:40px auto;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;`;
 const header = `background:linear-gradient(135deg,#005c2e 0%,#0a7c40 100%);padding:32px 40px;text-align:center;`;
@@ -28,6 +33,7 @@ function wrap(headerSub: string, bodyHtml: string): string {
 
 // ── HU001: Código de verificación ────────────────────────────────────────────
 export async function enviarCodigoVerificacion(email: string, nombre: string, codigo: string): Promise<void> {
+    if (esDemoEmail(email)) { console.log(`[Email][DEMO] verificación omitida para ${email}`); return; }
     const html = wrap('Verificación de cuenta', `
         <p style="color:#374151;font-size:15px;margin:0 0 8px">Hola, <strong>${nombre}</strong> 👋</p>
         <p style="color:#64748b;font-size:14px;margin:0 0 24px;line-height:1.6">
@@ -44,6 +50,7 @@ export async function enviarCodigoVerificacion(email: string, nombre: string, co
 
 // ── HU002: Confirmación de login ──────────────────────────────────────────────
 export async function enviarConfirmacionLogin(email: string, nombre: string, rol: string): Promise<void> {
+    if (esDemoEmail(email)) { console.log(`[Email][DEMO] login omitido para ${email}`); return; }
     const ahora = new Date().toLocaleString('es-CL', { timeZone: 'America/Santiago', day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     const html  = wrap('Inicio de sesión exitoso', `
         <p style="color:#374151;font-size:15px;margin:0 0 8px">Hola, <strong>${nombre}</strong></p>
@@ -61,6 +68,7 @@ export async function enviarConfirmacionLogin(email: string, nombre: string, rol
 
 // ── HU003: Enlace de recuperación ────────────────────────────────────────────
 export async function enviarEnlaceRecuperacion(email: string, nombre: string, token: string): Promise<void> {
+    if (esDemoEmail(email)) { console.log(`[Email][DEMO] recuperación omitida para ${email}`); return; }
     const enlace = `${BASE_URL}/demo/hu003?token=${token}`;
     const html   = wrap('Recuperación de contraseña', `
         <p style="color:#374151;font-size:15px;margin:0 0 8px">Hola, <strong>${nombre || 'usuario'}</strong></p>
@@ -84,6 +92,7 @@ export async function enviarNotificacionCambioEstado(
     email: string, nombre: string, codigoReporte: string, tituloReporte: string,
     estadoAnterior: string, estadoNuevo: string, comentario?: string
 ): Promise<void> {
+    if (esDemoEmail(email)) { console.log(`[Email][DEMO] notificación estado omitida para ${email} (${codigoReporte}: ${estadoAnterior} → ${estadoNuevo})`); return; }
     const colores: Record<string, string> = { 'Pendiente':'#EF4444','En Proceso':'#F59E0B','Resuelto':'#22C55E','Rechazado':'#6B7280' };
     const colorNuevo = colores[estadoNuevo] || '#64748b';
     const ahora = new Date().toLocaleString('es-CL', { timeZone: 'America/Santiago', day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });

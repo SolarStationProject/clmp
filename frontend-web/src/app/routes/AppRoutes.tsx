@@ -18,6 +18,7 @@ const HU023 = lazy(() => import('../../demo/HU023_HistorialReportes'));
 
 // Administrador
 const HU006 = lazy(() => import('../../demo/HU006_CambiarEstado'));
+const HU016 = lazy(() => import('../../demo/HU016_Notificaciones'));
 const HU018 = lazy(() => import('../../demo/HU018_MapaCalor'));
 
 // Cualquier rol autenticado
@@ -58,6 +59,7 @@ export default function AppRoutes() {
 
                 {/* Administrador */}
                 <Route path="/demo/hu006" element={<AuthGuard rolRequerido="Administrador"><HU006 /></AuthGuard>} />
+                <Route path="/demo/hu016" element={<AuthGuard rolRequerido="Administrador"><HU016 /></AuthGuard>} />
                 <Route path="/demo/hu018" element={<AuthGuard rolRequerido="Administrador"><HU018 /></AuthGuard>} />
 
                 {/* Cualquier rol */}
