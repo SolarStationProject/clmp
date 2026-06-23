@@ -169,6 +169,70 @@ export async function obtenerTodos(_usuarioId: string, _usuarioRol: RolUsuario):
     return result.rows;
 }
 
+// HU014: Reportes filtrados por estado, categoría, comuna, fechas, prioridad (solo Admin)
+export async function obtenerFiltrados(filtros: {
+    estado?: string; categoria?: string; comuna?: string;
+    fechaDesde?: string; fechaHasta?: string; prioridad?: string;
+}): Promise<Reporte[]> {
+    const conds: string[] = ['COALESCE(r.eliminado, false) = false'];
+    const params: unknown[] = [];
+    let i = 1;
+    if (filtros.estado)     { conds.push(`r.estado = $${i++}`);              params.push(filtros.estado); }
+    if (filtros.categoria)  { conds.push(`r.categoria = $${i++}`);           params.push(filtros.categoria); }
+    if (filtros.comuna)     { conds.push(`r.comuna ILIKE $${i++}`);          params.push(`%${filtros.comuna}%`); }
+    if (filtros.fechaDesde) { conds.push(`r.fecha_creacion >= $${i++}`);     params.push(filtros.fechaDesde); }
+    if (filtros.fechaHasta) { conds.push(`r.fecha_creacion <= $${i++}::date + 1`); params.push(filtros.fechaHasta); }
+    if (filtros.prioridad)  { conds.push(`COALESCE(r.prioridad,'Normal') = $${i++}`); params.push(filtros.prioridad); }
+    const result = await db.query<Reporte>(
+        `SELECT r.id, r.ciudadano_id, r.codigo, r.titulo, r.descripcion, r.categoria, r.foto,
+                r.fecha_creacion::text AS fecha_creacion, r.estado, r.direccion, r.comuna,
+                COALESCE(r.prioridad, 'Normal') AS prioridad,
+                ST_Y(r.geom) AS latitud, ST_X(r.geom) AS longitud, u.nombre
+         FROM reportes r INNER JOIN usuarios u ON r.ciudadano_id = u.id
+         WHERE ${conds.join(' AND ')}
+         ORDER BY r.fecha_creacion DESC`,
+        params
+    );
+    return result.rows;
+}
+
+// HU015: Asignar prioridad a un reporte (solo Admin)
+export async function asignarPrioridad(reporteId: string, prioridad: string): Promise<boolean> {
+    const result = await db.query(
+        `UPDATE reportes SET prioridad = $1 WHERE id = $2`,
+        [prioridad, reporteId]
+    );
+    return (result.rowCount ?? 0) > 0;
+}
+
+// HU017: KPIs agregados del sistema
+export async function getKPIs(): Promise<{
+    total: number; pendientes: number; en_proceso: number; resueltos: number; rechazados: number;
+    pct_resuelto: number;
+    por_categoria: Array<{ categoria: string; total: number }>;
+    por_comuna:    Array<{ comuna: string;    total: number }>;
+}> {
+    const [resumen, porCat, porCom] = await Promise.all([
+        db.query(`
+            SELECT COUNT(*)::int AS total,
+                   COUNT(*) FILTER (WHERE estado='Pendiente')::int  AS pendientes,
+                   COUNT(*) FILTER (WHERE estado='En Proceso')::int AS en_proceso,
+                   COUNT(*) FILTER (WHERE estado='Resuelto')::int   AS resueltos,
+                   COUNT(*) FILTER (WHERE estado='Rechazado')::int  AS rechazados,
+                   ROUND(COUNT(*) FILTER (WHERE estado='Resuelto')*100.0/NULLIF(COUNT(*),0),1) AS pct_resuelto
+            FROM reportes WHERE COALESCE(eliminado,false)=false`),
+        db.query(`
+            SELECT categoria, COUNT(*)::int AS total FROM reportes
+            WHERE COALESCE(eliminado,false)=false
+            GROUP BY categoria ORDER BY total DESC LIMIT 6`),
+        db.query(`
+            SELECT comuna, COUNT(*)::int AS total FROM reportes
+            WHERE COALESCE(eliminado,false)=false
+            GROUP BY comuna ORDER BY total DESC LIMIT 5`),
+    ]);
+    return { ...resumen.rows[0], por_categoria: porCat.rows, por_comuna: porCom.rows };
+}
+
 // HU012: Verificar si coordenadas están dentro de Providencia (bounding box PostGIS)
 export async function verificarDentroProvidencia(lat: number, lng: number): Promise<boolean> {
     const result = await db.query<{ dentro: boolean }>(

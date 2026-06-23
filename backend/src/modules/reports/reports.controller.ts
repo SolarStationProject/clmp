@@ -212,6 +212,74 @@ export async function crearReporte(req: Request, res: Response): Promise<void> {
     }
 }
 
+// HU014: Reportes filtrados (solo Admin)
+export async function filtrarReportes(req: Request, res: Response): Promise<void> {
+    const { estado, categoria, comuna, fechaDesde, fechaHasta, prioridad } = req.query;
+    try {
+        const data = await reportsRepository.obtenerFiltrados({
+            estado:     estado     as string | undefined,
+            categoria:  categoria  as string | undefined,
+            comuna:     comuna     as string | undefined,
+            fechaDesde: fechaDesde as string | undefined,
+            fechaHasta: fechaHasta as string | undefined,
+            prioridad:  prioridad  as string | undefined,
+        });
+        res.status(200).json({ success: true, results: data.length, data });
+    } catch (err: any) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+}
+
+// HU015: Asignar prioridad (solo Admin)
+export async function asignarPrioridad(req: Request, res: Response): Promise<void> {
+    const { reporteId } = req.params;
+    const { prioridad } = req.body;
+    const PRIORIDADES = ['Baja', 'Normal', 'Alta', 'Crítica'];
+    if (!prioridad || !PRIORIDADES.includes(prioridad)) {
+        res.status(400).json({ success: false, message: `Prioridad inválida. Opciones: ${PRIORIDADES.join(', ')}` });
+        return;
+    }
+    try {
+        const ok = await reportsRepository.asignarPrioridad(reporteId, prioridad);
+        if (!ok) { res.status(404).json({ success: false, message: 'Reporte no encontrado.' }); return; }
+        res.status(200).json({ success: true, mensaje: `Prioridad actualizada a ${prioridad}` });
+    } catch (err: any) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+}
+
+// HU017: KPIs del sistema (solo Admin)
+export async function getKPIs(req: Request, res: Response): Promise<void> {
+    try {
+        const data = await reportsRepository.getKPIs();
+        res.status(200).json({ success: true, data });
+    } catch (err: any) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+}
+
+// HU011: Exportar reportes a CSV (solo Admin)
+export async function exportarCSV(req: Request, res: Response): Promise<void> {
+    try {
+        const reportes = await reportsRepository.obtenerFiltrados({});
+        const cabecera = 'Código,Título,Categoría,Estado,Prioridad,Dirección,Comuna,Ciudadano,Fecha\n';
+        const filas = reportes.map(r => {
+            const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+            return [
+                esc(r.codigo), esc(r.titulo), esc(r.categoria), esc(r.estado),
+                esc((r as any).prioridad ?? 'Normal'), esc(r.direccion), esc(r.comuna),
+                esc(r.nombre), esc(r.fecha_creacion),
+            ].join(',');
+        }).join('\n');
+        const csv = '﻿' + cabecera + filas; // BOM para Excel en español
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        res.setHeader('Content-Disposition', `attachment; filename="cleanmap_reportes_${new Date().toISOString().slice(0,10)}.csv"`);
+        res.status(200).send(csv);
+    } catch (err: any) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+}
+
 // HU012: Verificar si coordenadas están dentro de Providencia
 export async function checkComuna(req: Request, res: Response): Promise<void> {
     const lat = parseFloat(req.query.lat as string);

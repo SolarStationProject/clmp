@@ -10,6 +10,10 @@ import {
     eliminarReporte,
     checkComuna,
     checkDuplicado,
+    filtrarReportes,
+    asignarPrioridad,
+    getKPIs,
+    exportarCSV,
 } from './reports.controller';
 import { soloAdministrador, soloCiudadano } from '../../middlewares';
 import { upload } from '../../middlewares';
@@ -19,6 +23,9 @@ const router = Router();
 router.get('/my-reports',      getReportesPropios);
 router.get('/check-comuna',    checkComuna);
 router.get('/check-duplicado', checkDuplicado);
+router.get('/filtrar',         soloAdministrador, filtrarReportes);
+router.get('/kpis',            soloAdministrador, getKPIs);
+router.get('/export-csv',      soloAdministrador, exportarCSV);
 router.get('/',                obtenerReportes);
 router.get('/:id',             getDetalleReporte);
 
@@ -32,7 +39,8 @@ router.put('/:reporteId/editar',   soloCiudadano, upload.single('foto'), editarR
 router.delete('/:reporteId',       soloCiudadano, eliminarReporte);
 
 // HU006: Operaciones de administración (solo Administrador)
-router.post('/:reporteId/history', soloAdministrador, crearCambioHistorial);
-router.put('/:reporteId/status',   soloAdministrador, actualizarEstadoReporte);
+router.post('/:reporteId/history',   soloAdministrador, crearCambioHistorial);
+router.put('/:reporteId/status',     soloAdministrador, actualizarEstadoReporte);
+router.put('/:reporteId/prioridad',  soloAdministrador, asignarPrioridad);
 
 export default router;

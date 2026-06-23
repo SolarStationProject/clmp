@@ -12,6 +12,10 @@ const HUS = [
     { id: 'HU016', ruta: '/demo/hu016', integrante: 'Alex',       color: '#0369A1', bg: '#EFF6FF', titulo: 'Notificaciones por Email',         descripcion: 'Email automático al ciudadano cuando el admin cambia el estado de su reporte.' },
     { id: 'HU009', ruta: '/demo/hu009', integrante: 'Jaime',      color: '#0EA5E9', bg: '#F0F9FF', titulo: 'Geolocalización Automática GPS',  descripcion: 'Captura coordenadas, muestra marcador en mapa y alerta si precisión > 50m.' },
     { id: 'HU010', ruta: '/demo/hu010', integrante: 'Julián',     color: '#D97706', bg: '#FFFBEB', titulo: 'Consultar Estado de Reportes',    descripcion: 'Lista de mis reportes con historial de cambios y notificaciones de estado.' },
+    { id: 'HU011', ruta: '/demo/hu011', integrante: 'Martín',     color: '#059669', bg: '#ECFDF5', titulo: 'Exportar Reportes CSV',            descripcion: 'Admin descarga todos los reportes en CSV compatible con Excel (UTF-8 BOM).' },
+    { id: 'HU014', ruta: '/demo/hu014', integrante: 'Martín',     color: '#0369A1', bg: '#EFF6FF', titulo: 'Filtrar Reportes',                  descripcion: 'Filtros por estado, categoría, prioridad, comuna y rango de fechas.' },
+    { id: 'HU015', ruta: '/demo/hu015', integrante: 'Martín',     color: '#D97706', bg: '#FFFBEB', titulo: 'Asignar Prioridad',                  descripcion: 'Admin asigna Baja/Normal/Alta/Crítica a cada reporte para gestionar urgencias.' },
+    { id: 'HU017', ruta: '/demo/hu017', integrante: 'Martín',     color: '#6D28D9', bg: '#FAF5FF', titulo: 'Dashboard de Indicadores',           descripcion: 'KPIs: totales por estado, tasa de resolución, top categorías y comunas.' },
     { id: 'HU018', ruta: '/demo/hu018', integrante: 'Martín',     color: '#6D28D9', bg: '#FAF5FF', titulo: 'Indicadores Ambientales por Zona','descripcion': 'Mapa de calor de microbasurales, zonas críticas y exportación CSV.' },
     { id: 'HU021', ruta: '/demo/hu021', integrante: 'Julián',     color: '#D97706', bg: '#FFFBEB', titulo: 'Consultar Detalles de Reporte',   descripcion: 'Detalle completo: foto, descripción, ubicación, historial. Admin ve notas internas.' },
     { id: 'HU012', ruta: '/demo/hu012', integrante: 'Jaime',      color: '#0F766E', bg: '#F0FDFA', titulo: 'Límite por Comuna (Providencia)',   descripcion: 'Solo se aceptan reportes dentro de Providencia. Validación con PostGIS bounding box.' },
@@ -53,7 +57,7 @@ export default function DemoIndex() {
             {/* Contador */}
             <div style={{ maxWidth: '960px', margin: '-28px auto 0', padding: '0 16px' }}>
                 <div style={{ backgroundColor: '#fff', borderRadius: '16px', padding: '16px', display: 'flex', justifyContent: 'space-around', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', marginBottom: '32px' }}>
-                    {[['17', 'Historias de usuario'], ['6', 'Integrantes'], ['3', 'Módulos'], ['2', 'Plataformas']].map(([n, label]) => (
+                    {[['21', 'Historias de usuario'], ['6', 'Integrantes'], ['3', 'Módulos'], ['2', 'Plataformas']].map(([n, label]) => (
                         <div key={label} style={{ textAlign: 'center' }}>
                             <p style={{ fontSize: '28px', fontWeight: '800', color: '#005c2e', margin: 0 }}>{n}</p>
                             <p style={{ fontSize: '12px', color: '#64748b', margin: '2px 0 0 0' }}>{label}</p>

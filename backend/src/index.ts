@@ -14,9 +14,11 @@ const PORT = process.env.PORT || 3000;
 
 globalMiddlewares(app);
 
-// Migración idempotente: columna eliminado en reportes
+// Migraciones idempotentes
 db.query(`ALTER TABLE reportes ADD COLUMN IF NOT EXISTS eliminado BOOLEAN DEFAULT FALSE`)
-    .catch(e => console.warn('[Migration] eliminado column:', e.message));
+    .catch(e => console.warn('[Migration] eliminado:', e.message));
+db.query(`ALTER TABLE reportes ADD COLUMN IF NOT EXISTS prioridad VARCHAR(20) DEFAULT 'Normal'`)
+    .catch(e => console.warn('[Migration] prioridad:', e.message));
 
 app.get('/', (_req, res) => res.json({ status: 'ok', servicio: 'CleanMap API', version: '1.0.0' }));
 
