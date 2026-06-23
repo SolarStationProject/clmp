@@ -16,6 +16,7 @@ const HU004 = lazy(() => import('../../demo/HU004_CrearReporte'));
 const HU009 = lazy(() => import('../../demo/HU009_GPS'));
 const HU010 = lazy(() => import('../../demo/HU010_EstadoReportes'));
 const HU012 = lazy(() => import('../../demo/HU012_LimiteComuna'));
+const HU013 = lazy(() => import('../../demo/HU013_ValidacionComunitaria'));
 const HU019 = lazy(() => import('../../demo/HU019_EditarReporte'));
 const HU020 = lazy(() => import('../../demo/HU020_EliminarReporte'));
 const HU022 = lazy(() => import('../../demo/HU022_DeteccionDuplicados'));
@@ -23,6 +24,7 @@ const HU023 = lazy(() => import('../../demo/HU023_HistorialReportes'));
 
 // Administrador
 const HU006 = lazy(() => import('../../demo/HU006_CambiarEstado'));
+const HU008 = lazy(() => import('../../demo/HU008_VerificarReporte'));
 const HU011 = lazy(() => import('../../demo/HU011_ExportarCSV'));
 const HU014 = lazy(() => import('../../demo/HU014_FiltrarReportes'));
 const HU015 = lazy(() => import('../../demo/HU015_AsignarPrioridad'));
@@ -63,6 +65,7 @@ export default function AppRoutes() {
                 <Route path="/demo/hu009" element={<AuthGuard rolRequerido="Ciudadano"><HU009 /></AuthGuard>} />
                 <Route path="/demo/hu010" element={<AuthGuard rolRequerido="Ciudadano"><HU010 /></AuthGuard>} />
                 <Route path="/demo/hu012" element={<AuthGuard rolRequerido="Ciudadano"><HU012 /></AuthGuard>} />
+                <Route path="/demo/hu013" element={<AuthGuard rolRequerido="Ciudadano"><HU013 /></AuthGuard>} />
                 <Route path="/demo/hu019" element={<AuthGuard rolRequerido="Ciudadano"><HU019 /></AuthGuard>} />
                 <Route path="/demo/hu020" element={<AuthGuard rolRequerido="Ciudadano"><HU020 /></AuthGuard>} />
                 <Route path="/demo/hu022" element={<AuthGuard rolRequerido="Ciudadano"><HU022 /></AuthGuard>} />
@@ -70,6 +73,7 @@ export default function AppRoutes() {
 
                 {/* Administrador */}
                 <Route path="/demo/hu006" element={<AuthGuard rolRequerido="Administrador"><HU006 /></AuthGuard>} />
+                <Route path="/demo/hu008" element={<AuthGuard rolRequerido="Administrador"><HU008 /></AuthGuard>} />
                 <Route path="/demo/hu011" element={<AuthGuard rolRequerido="Administrador"><HU011 /></AuthGuard>} />
                 <Route path="/demo/hu014" element={<AuthGuard rolRequerido="Administrador"><HU014 /></AuthGuard>} />
                 <Route path="/demo/hu015" element={<AuthGuard rolRequerido="Administrador"><HU015 /></AuthGuard>} />

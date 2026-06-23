@@ -8,6 +8,8 @@ const HUS = [
     { id: 'HU004', ruta: '/demo/hu004', integrante: 'Jaime',      color: '#0EA5E9', bg: '#F0F9FF', titulo: 'Crear Reporte con Foto y GPS',    descripcion: 'Formulario con cámara, GPS automático, categoría y estado inicial Pendiente.' },
     { id: 'HU005', ruta: '/demo/hu005', integrante: 'William',    color: '#059669', bg: '#ECFDF5', titulo: 'Mapa Interactivo de Reportes',    descripcion: 'Marcadores de colores por estado, click para ver detalle, zoom y filtros.' },
     { id: 'HU006', ruta: '/demo/hu006', integrante: 'Alex',       color: '#DC2626', bg: '#FEF2F2', titulo: 'Cambiar Estado de Reportes',      descripcion: 'Admin selecciona reporte, cambia estado y notifica al ciudadano en < 30 s.' },
+    { id: 'HU008', ruta: '/demo/hu008', integrante: 'Alex',       color: '#7C2D12', bg: '#FFF7ED', titulo: 'Verificar Autenticidad',           descripcion: 'Admin valida reportes manualmente. Imagga AI ya verificó la foto al crear.' },
+    { id: 'HU013', ruta: '/demo/hu013', integrante: 'William',    color: '#059669', bg: '#ECFDF5', titulo: 'Validación Comunitaria',           descripcion: 'Ciudadanos confirman "yo también lo vi". 5+ confirmaciones = Alta credibilidad.' },
     { id: 'HU007', ruta: '/demo/hu007', integrante: 'Alex',       color: '#DC2626', bg: '#FEF2F2', titulo: 'Control de Acceso por Plataforma','descripcion': 'Admin solo en web, ciudadano solo en móvil. Roles con JWT.' },
     { id: 'HU016', ruta: '/demo/hu016', integrante: 'Alex',       color: '#0369A1', bg: '#EFF6FF', titulo: 'Notificaciones por Email',         descripcion: 'Email automático al ciudadano cuando el admin cambia el estado de su reporte.' },
     { id: 'HU009', ruta: '/demo/hu009', integrante: 'Jaime',      color: '#0EA5E9', bg: '#F0F9FF', titulo: 'Geolocalización Automática GPS',  descripcion: 'Captura coordenadas, muestra marcador en mapa y alerta si precisión > 50m.' },
@@ -57,7 +59,7 @@ export default function DemoIndex() {
             {/* Contador */}
             <div style={{ maxWidth: '960px', margin: '-28px auto 0', padding: '0 16px' }}>
                 <div style={{ backgroundColor: '#fff', borderRadius: '16px', padding: '16px', display: 'flex', justifyContent: 'space-around', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', marginBottom: '32px' }}>
-                    {[['21', 'Historias de usuario'], ['6', 'Integrantes'], ['3', 'Módulos'], ['2', 'Plataformas']].map(([n, label]) => (
+                    {[['23', 'Historias de usuario'], ['6', 'Integrantes'], ['3', 'Módulos'], ['2', 'Plataformas']].map(([n, label]) => (
                         <div key={label} style={{ textAlign: 'center' }}>
                             <p style={{ fontSize: '28px', fontWeight: '800', color: '#005c2e', margin: 0 }}>{n}</p>
                             <p style={{ fontSize: '12px', color: '#64748b', margin: '2px 0 0 0' }}>{label}</p>

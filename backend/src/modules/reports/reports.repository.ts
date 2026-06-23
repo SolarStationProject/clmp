@@ -169,6 +169,86 @@ export async function obtenerTodos(_usuarioId: string, _usuarioRol: RolUsuario):
     return result.rows;
 }
 
+// HU008: Verificar autenticidad de reporte (admin)
+export async function verificarReporte(reporteId: string): Promise<boolean> {
+    const result = await db.query(
+        `UPDATE reportes SET verificado_admin = true WHERE id = $1`,
+        [reporteId]
+    );
+    return (result.rowCount ?? 0) > 0;
+}
+
+// HU013: Confirmar reporte (ciudadano — un voto por reporte)
+export async function confirmarReporte(reporteId: string, ciudadanoId: string): Promise<{ ok: boolean; yaConfirmado: boolean }> {
+    try {
+        await db.query(
+            `INSERT INTO confirmaciones_reporte (reporte_id, ciudadano_id) VALUES ($1, $2)`,
+            [reporteId, ciudadanoId]
+        );
+        return { ok: true, yaConfirmado: false };
+    } catch (err: any) {
+        if (err.code === '23505') return { ok: false, yaConfirmado: true }; // PK duplicada
+        throw err;
+    }
+}
+
+// HU013: Contar confirmaciones y verificar si el ciudadano ya confirmó
+export async function getConfirmaciones(reporteId: string, ciudadanoId?: string): Promise<{
+    total: number; yaConfirmado: boolean;
+}> {
+    const [cnt, mine] = await Promise.all([
+        db.query<{ total: number }>(`SELECT COUNT(*)::int AS total FROM confirmaciones_reporte WHERE reporte_id = $1`, [reporteId]),
+        ciudadanoId
+            ? db.query<{ existe: boolean }>(`SELECT EXISTS(SELECT 1 FROM confirmaciones_reporte WHERE reporte_id=$1 AND ciudadano_id=$2) AS existe`, [reporteId, ciudadanoId])
+            : Promise.resolve({ rows: [{ existe: false }] }),
+    ]);
+    return { total: cnt.rows[0].total, yaConfirmado: mine.rows[0].existe };
+}
+
+// HU008: Lista de reportes para verificación admin (con count confirmaciones)
+export async function getReportesParaVerificar(): Promise<Array<{
+    id: string; codigo: string; titulo: string; categoria: string; estado: string;
+    prioridad: string; foto?: string; verificado_admin: boolean; fecha_creacion: string;
+    nombre: string; confirmaciones: number;
+}>> {
+    const result = await db.query(`
+        SELECT r.id, r.codigo, r.titulo, r.categoria, r.estado,
+               COALESCE(r.prioridad, 'Normal')        AS prioridad,
+               r.foto,
+               COALESCE(r.verificado_admin, false)    AS verificado_admin,
+               r.fecha_creacion::text                 AS fecha_creacion,
+               u.nombre,
+               (SELECT COUNT(*)::int FROM confirmaciones_reporte c WHERE c.reporte_id = r.id) AS confirmaciones
+        FROM reportes r
+        INNER JOIN usuarios u ON r.ciudadano_id = u.id
+        WHERE COALESCE(r.eliminado, false) = false
+        ORDER BY r.verificado_admin ASC, r.fecha_creacion DESC
+    `);
+    return result.rows;
+}
+
+// HU013: Reportes de otros ciudadanos para confirmar
+export async function getReportesParaConfirmar(ciudadanoId: string): Promise<Array<{
+    id: string; codigo: string; titulo: string; categoria: string; estado: string;
+    foto?: string; fecha_creacion: string; direccion: string; nombre: string;
+    confirmaciones: number; ya_confirme: boolean;
+}>> {
+    const result = await db.query(`
+        SELECT r.id, r.codigo, r.titulo, r.categoria, r.estado,
+               r.foto, r.fecha_creacion::text AS fecha_creacion, r.direccion, u.nombre,
+               (SELECT COUNT(*)::int FROM confirmaciones_reporte c WHERE c.reporte_id = r.id) AS confirmaciones,
+               EXISTS(SELECT 1 FROM confirmaciones_reporte c WHERE c.reporte_id = r.id AND c.ciudadano_id = $1) AS ya_confirme
+        FROM reportes r
+        INNER JOIN usuarios u ON r.ciudadano_id = u.id
+        WHERE r.ciudadano_id != $1
+          AND COALESCE(r.eliminado, false) = false
+          AND r.estado IN ('Pendiente','En Proceso')
+        ORDER BY r.fecha_creacion DESC
+        LIMIT 50
+    `, [ciudadanoId]);
+    return result.rows;
+}
+
 // HU014: Reportes filtrados por estado, categoría, comuna, fechas, prioridad (solo Admin)
 export async function obtenerFiltrados(filtros: {
     estado?: string; categoria?: string; comuna?: string;

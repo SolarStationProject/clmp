@@ -14,18 +14,24 @@ import {
     asignarPrioridad,
     getKPIs,
     exportarCSV,
+    verificarReporte,
+    getReportesParaVerificar,
+    confirmarReporte,
+    getReportesParaConfirmar,
 } from './reports.controller';
 import { soloAdministrador, soloCiudadano } from '../../middlewares';
 import { upload } from '../../middlewares';
 
 const router = Router();
 
-router.get('/my-reports',      getReportesPropios);
-router.get('/check-comuna',    checkComuna);
-router.get('/check-duplicado', checkDuplicado);
-router.get('/filtrar',         soloAdministrador, filtrarReportes);
-router.get('/kpis',            soloAdministrador, getKPIs);
-router.get('/export-csv',      soloAdministrador, exportarCSV);
+router.get('/my-reports',        getReportesPropios);
+router.get('/check-comuna',      checkComuna);
+router.get('/check-duplicado',   checkDuplicado);
+router.get('/filtrar',           soloAdministrador, filtrarReportes);
+router.get('/kpis',              soloAdministrador, getKPIs);
+router.get('/export-csv',        soloAdministrador, exportarCSV);
+router.get('/para-verificar',    soloAdministrador, getReportesParaVerificar);
+router.get('/para-confirmar',    soloCiudadano,     getReportesParaConfirmar);
 router.get('/',                obtenerReportes);
 router.get('/:id',             getDetalleReporte);
 
@@ -42,5 +48,7 @@ router.delete('/:reporteId',       soloCiudadano, eliminarReporte);
 router.post('/:reporteId/history',   soloAdministrador, crearCambioHistorial);
 router.put('/:reporteId/status',     soloAdministrador, actualizarEstadoReporte);
 router.put('/:reporteId/prioridad',  soloAdministrador, asignarPrioridad);
+router.put('/:reporteId/verificar',  soloAdministrador, verificarReporte);
+router.post('/:reporteId/confirmar', soloCiudadano,     confirmarReporte);
 
 export default router;

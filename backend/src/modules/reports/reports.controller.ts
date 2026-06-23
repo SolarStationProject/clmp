@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import * as reportsService from './reports.service';
 import * as reportsRepository from './reports.repository';
 import * as emailService from '../../services/email.service';
+import * as imaggaService from '../../services/imagga.service';
 import { EstadoReporte, RolUsuario } from '../../shared/types';
 
 // HU010/HU023: Lista de reportes propios del ciudadano
@@ -170,11 +171,30 @@ export async function crearReporte(req: Request, res: Response): Promise<void> {
         res.status(400).json({ success: false, message: 'Todos los campos son requeridos.' });
         return;
     }
-    // Acepta foto como archivo multer (multipart) O como base64 en el body JSON
+    // Foto obligatoria para verificación Imagga
     const foto = req.file ? `/uploads/reports/${req.file.filename}` : (fotoBase64 || undefined);
+    if (!foto) {
+        res.status(400).json({ success: false, message: 'Se requiere una foto para crear el reporte.' });
+        return;
+    }
+
     const lat = parseFloat(latitud);
     const lng = parseFloat(longitud);
     try {
+        // HU008: Verificar foto con Imagga — solo para base64 (fotos subidas desde la app)
+        if (foto.startsWith('data:')) {
+            const imagga = await imaggaService.verificarFotoBasura(foto);
+            if (!imagga.esBasura) {
+                res.status(400).json({
+                    success:   false,
+                    message:   'La foto no muestra residuos ni basura. Por favor sube una foto clara del problema.',
+                    etiquetas: imagga.etiquetas,
+                    caption:   imagga.caption,
+                });
+                return;
+            }
+        }
+
         // HU012: Validar que las coordenadas estén dentro de Providencia
         const dentroProvidencia = await reportsRepository.verificarDentroProvidencia(lat, lng);
         if (!dentroProvidencia) {
@@ -207,6 +227,53 @@ export async function crearReporte(req: Request, res: Response): Promise<void> {
             mensaje: 'Reporte creado con estado Pendiente',
             data,
         });
+    } catch (err: any) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+}
+
+// HU008: Verificar autenticidad de reporte (solo Admin)
+export async function verificarReporte(req: Request, res: Response): Promise<void> {
+    const { reporteId } = req.params;
+    try {
+        const ok = await reportsRepository.verificarReporte(reporteId);
+        if (!ok) { res.status(404).json({ success: false, message: 'Reporte no encontrado.' }); return; }
+        res.status(200).json({ success: true, mensaje: 'Reporte verificado como auténtico.' });
+    } catch (err: any) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+}
+
+export async function getReportesParaVerificar(_req: Request, res: Response): Promise<void> {
+    try {
+        const data = await reportsRepository.getReportesParaVerificar();
+        res.status(200).json({ success: true, data });
+    } catch (err: any) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+}
+
+// HU013: Confirmar reporte (solo Ciudadano)
+export async function confirmarReporte(req: Request, res: Response): Promise<void> {
+    const { reporteId } = req.params;
+    const ciudadanoId   = req.usuario!.id;
+    try {
+        const result = await reportsRepository.confirmarReporte(reporteId, ciudadanoId);
+        if (result.yaConfirmado) {
+            res.status(409).json({ success: false, message: 'Ya confirmaste este reporte anteriormente.' });
+            return;
+        }
+        res.status(200).json({ success: true, mensaje: 'Confirmación registrada.' });
+    } catch (err: any) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+}
+
+export async function getReportesParaConfirmar(req: Request, res: Response): Promise<void> {
+    const ciudadanoId = req.usuario!.id;
+    try {
+        const data = await reportsRepository.getReportesParaConfirmar(ciudadanoId);
+        res.status(200).json({ success: true, data });
     } catch (err: any) {
         res.status(500).json({ success: false, message: err.message });
     }
