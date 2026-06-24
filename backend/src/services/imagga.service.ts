@@ -31,22 +31,23 @@ export async function verificarFotoBasura(fotoBase64: string): Promise<{
         throw new Error(`Imagga ${res.status}: ${txt}`);
     }
 
-    const data    = await res.json() as any;
-    const tags    = data.tags || {};
-    const objects  = (tags.objects  || []).map((t: string) => t.toLowerCase());
-    const mood     = (tags.mood     || []).map((t: string) => t.toLowerCase());
-    const extended = (tags.extended || []).map((t: string) => t.toLowerCase());
-    const scene    = (tags.scene    || []).map((t: string) => t.toLowerCase());
+    const data = await res.json() as any;
 
-    const esBasura =
-        objects.some((t: string)  => TAGS_BASURA.includes(t))  ||
-        mood.some((t: string)     => MOOD_BASURA.includes(t))   ||
-        extended.some((t: string) => TAGS_BASURA.includes(t))   ||
-        scene.some((t: string)    => SCENE_BASURA.includes(t));
+    // Imagga v3 /tags devuelve result.tags como array de { confidence, tag: { en } }
+    const rawTags: Array<{ confidence: number; tag: { en: string } }> =
+        data?.result?.tags || [];
+
+    const etiquetas = rawTags
+        .filter(t => t.confidence >= 25)
+        .map(t => t.tag.en.toLowerCase());
+
+    const esBasura = etiquetas.some(t =>
+        TAGS_BASURA.includes(t) || MOOD_BASURA.includes(t) || SCENE_BASURA.includes(t)
+    );
 
     return {
         esBasura,
-        etiquetas: [...new Set([...objects, ...mood, ...extended])],
-        caption:   data.caption,
+        etiquetas,
+        caption: data?.result?.caption?.text,
     };
 }
