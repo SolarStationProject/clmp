@@ -41,6 +41,7 @@ export default function HU004_CrearReporte() {
     const [enviando,         setEnviando]         = useState(false);
     const [errorEnvio,       setErrorEnvio]       = useState('');
     const [creado,           setCreado]           = useState<{ codigo: string } | null>(null);
+    const [rawResponse,      setRawResponse]      = useState<unknown>(null);
     const [modoUbicacion,    setModoUbicacion]    = useState<'gps' | 'manual'>('gps');
     const [busqueda,         setBusqueda]         = useState('');
     const [buscando,         setBuscando]         = useState(false);
@@ -221,6 +222,7 @@ export default function HU004_CrearReporte() {
                 }),
             });
             const data = await res.json();
+            setRawResponse(data);
             if (!res.ok) { setErrorEnvio(data.message || 'Error al crear el reporte.'); return; }
             setCreado({ codigo: data.data?.codigo || 'CLM-NUEVO' });
         } catch {
@@ -233,7 +235,7 @@ export default function HU004_CrearReporte() {
     const resetear = () => {
         setCreado(null); setTitulo(''); setDescripcion(''); setCategoria('');
         setDireccion(''); setComuna('');
-        setFoto(null); setCoords(null); setGpsEstado('idle'); setAjustado(false); setErrorEnvio('');
+        setFoto(null); setCoords(null); setGpsEstado('idle'); setAjustado(false); setErrorEnvio(''); setRawResponse(null);
         setBusqueda(''); setErrorGeocode(''); setGeocodeOk(false); setModoUbicacion('gps');
     };
 
@@ -274,6 +276,15 @@ export default function HU004_CrearReporte() {
 
                     <SuccessMessage mensaje="Reporte creado con estado Pendiente" />
                     <button onClick={resetear} style={{ ...btnStyle('#0EA5E9'), marginTop: '16px' }}>Crear otro reporte</button>
+
+                    {rawResponse && (
+                        <div style={{ marginTop: '16px', textAlign: 'left' }}>
+                            <p style={{ fontSize: '11px', fontWeight: '700', color: '#64748B', marginBottom: '6px' }}>🔍 DEBUG — JSON respuesta API</p>
+                            <pre style={{ backgroundColor: '#0F172A', color: '#7DD3FC', borderRadius: '10px', padding: '12px', fontSize: '11px', overflowX: 'auto', margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+                                {JSON.stringify(rawResponse, null, 2)}
+                            </pre>
+                        </div>
+                    )}
                 </div>
             </Card>
         </DemoShell>
@@ -447,8 +458,16 @@ export default function HU004_CrearReporte() {
                     {enviando ? '⏳ Enviando reporte…' : coords ? '📤 Enviar reporte' : modoUbicacion === 'gps' ? 'Captura el GPS primero' : 'Busca una dirección primero'}
                 </button>
                 {errorEnvio && (
-                    <div style={{ backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '10px', padding: '12px', marginTop: '10px', fontSize: '13px', color: '#DC2626' }}>
-                        ❌ {errorEnvio}
+                    <div style={{ backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '10px', padding: '12px', marginTop: '10px' }}>
+                        <p style={{ fontSize: '13px', color: '#DC2626', margin: '0 0 8px 0' }}>❌ {errorEnvio}</p>
+                        {rawResponse && (
+                            <>
+                                <p style={{ fontSize: '11px', fontWeight: '700', color: '#991B1B', margin: '0 0 4px 0' }}>🔍 DEBUG — JSON respuesta API</p>
+                                <pre style={{ backgroundColor: '#0F172A', color: '#FCA5A5', borderRadius: '8px', padding: '10px', fontSize: '11px', overflowX: 'auto', margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+                                    {JSON.stringify(rawResponse, null, 2)}
+                                </pre>
+                            </>
+                        )}
                     </div>
                 )}
             </form>
