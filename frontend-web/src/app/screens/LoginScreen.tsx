@@ -22,17 +22,17 @@ export default function LoginScreen() {
             const res  = await fetch(`${API_URL}/api/auth/login`, {
                 method:  'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body:    JSON.stringify({ email, password }),
+                body:    JSON.stringify({ email, password, plataforma: 'movil' }),
             });
             const data = await res.json();
-            if (!res.ok) { setError(data.message || 'Credenciales incorrectas.'); return; }
+            if (!res.ok) { setError(data.error || data.message || 'Credenciales incorrectas.'); return; }
 
-            localStorage.setItem('cleanmap_token',  data.data.token);
-            localStorage.setItem('cleanmap_uid',    data.data.usuario.id);
-            localStorage.setItem('cleanmap_rol',    data.data.usuario.rol);
-            localStorage.setItem('cleanmap_nombre', data.data.usuario.nombre);
+            localStorage.setItem('cleanmap_token',  data.token);
+            localStorage.setItem('cleanmap_uid',    data.usuario.id);
+            localStorage.setItem('cleanmap_rol',    data.usuario.rol);
+            localStorage.setItem('cleanmap_nombre', data.usuario.nombre);
 
-            if (data.data.usuario.rol === 'Administrador') {
+            if (data.usuario.rol === 'Administrador') {
                 navigate('/demo', { replace: true });
             } else {
                 navigate('/app/mapa', { replace: true });
@@ -44,22 +44,48 @@ export default function LoginScreen() {
         }
     };
 
+    const [paso,       setPaso]       = useState<'form' | 'verificar'>('form');
+    const [codigo,     setCodigo]     = useState('');
+
     const handleRegistro = async (e: React.FormEvent) => {
         e.preventDefault();
         if (password !== confirm) { setError('Las contraseñas no coinciden.'); return; }
+        const PASSWORD_RE = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+        if (!PASSWORD_RE.test(password)) { setError('Mínimo 8 caracteres, una mayúscula y un número.'); return; }
         setCargando(true);
         setError('');
         try {
             const res  = await fetch(`${API_URL}/api/auth/register`, {
                 method:  'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body:    JSON.stringify({ nombre, email, password, rol: 'Ciudadano' }),
+                body:    JSON.stringify({ nombre, email, password }),
             });
             const data = await res.json();
-            if (!res.ok) { setError(data.message || 'Error al registrarse.'); return; }
+            if (!res.ok) { setError(data.error || 'Error al registrarse.'); return; }
+            setPaso('verificar');
+        } catch {
+            setError('No se pudo conectar con el servidor.');
+        } finally {
+            setCargando(false);
+        }
+    };
+
+    const handleVerificar = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setCargando(true);
+        setError('');
+        try {
+            const res  = await fetch(`${API_URL}/api/auth/verify-email`, {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({ email, codigo }),
+            });
+            const data = await res.json();
+            if (!res.ok) { setError(data.error || 'Código incorrecto.'); return; }
             setModo('login');
-            setError('');
+            setPaso('form');
             setPassword('');
+            setCodigo('');
         } catch {
             setError('No se pudo conectar con el servidor.');
         } finally {
@@ -107,35 +133,52 @@ export default function LoginScreen() {
             </div>
 
             {/* Formulario */}
-            <form onSubmit={modo === 'login' ? handleLogin : handleRegistro}
-                style={{ width: '100%', maxWidth: '360px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-
-                {modo === 'registro' && (
-                    <input style={inp} type="text" placeholder="Nombre completo" value={nombre}
-                        onChange={e => setNombre(e.target.value)} required />
-                )}
-
-                <input style={inp} type="email" placeholder="Correo electrónico" value={email}
-                    onChange={e => setEmail(e.target.value)} required autoComplete="email" />
-
-                <input style={inp} type="password" placeholder="Contraseña" value={password}
-                    onChange={e => setPassword(e.target.value)} required autoComplete={modo === 'login' ? 'current-password' : 'new-password'} />
-
-                {modo === 'registro' && (
-                    <input style={inp} type="password" placeholder="Confirmar contraseña" value={confirm}
-                        onChange={e => setConfirm(e.target.value)} required />
-                )}
-
-                {error && (
-                    <div style={{ backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '10px', padding: '12px', fontSize: '13px', color: '#DC2626' }}>
-                        {error}
+            {modo === 'registro' && paso === 'verificar' ? (
+                <form onSubmit={handleVerificar}
+                    style={{ width: '100%', maxWidth: '360px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div style={{ backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '10px', padding: '12px', fontSize: '13px', color: '#1D4ED8' }}>
+                        📬 Revisa tu email <strong>{email}</strong> — te enviamos un código de verificación.
                     </div>
-                )}
+                    <input style={inp} type="text" placeholder="Código de verificación" value={codigo}
+                        onChange={e => setCodigo(e.target.value)} required />
+                    {error && (
+                        <div style={{ backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '10px', padding: '12px', fontSize: '13px', color: '#DC2626' }}>{error}</div>
+                    )}
+                    <button type="submit" style={btn} disabled={cargando}>
+                        {cargando ? '⏳ Verificando…' : '✅ Verificar cuenta'}
+                    </button>
+                </form>
+            ) : (
+                <form onSubmit={modo === 'login' ? handleLogin : handleRegistro}
+                    style={{ width: '100%', maxWidth: '360px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
 
-                <button type="submit" style={btn} disabled={cargando}>
-                    {cargando ? '⏳ Cargando…' : modo === 'login' ? 'Entrar' : 'Crear cuenta'}
-                </button>
-            </form>
+                    {modo === 'registro' && (
+                        <input style={inp} type="text" placeholder="Nombre completo" value={nombre}
+                            onChange={e => setNombre(e.target.value)} required />
+                    )}
+
+                    <input style={inp} type="email" placeholder="Correo electrónico" value={email}
+                        onChange={e => setEmail(e.target.value)} required autoComplete="email" />
+
+                    <input style={inp} type="password" placeholder="Contraseña" value={password}
+                        onChange={e => setPassword(e.target.value)} required autoComplete={modo === 'login' ? 'current-password' : 'new-password'} />
+
+                    {modo === 'registro' && (
+                        <input style={inp} type="password" placeholder="Confirmar contraseña" value={confirm}
+                            onChange={e => setConfirm(e.target.value)} required />
+                    )}
+
+                    {error && (
+                        <div style={{ backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '10px', padding: '12px', fontSize: '13px', color: '#DC2626' }}>
+                            {error}
+                        </div>
+                    )}
+
+                    <button type="submit" style={btn} disabled={cargando}>
+                        {cargando ? '⏳ Cargando…' : modo === 'login' ? 'Entrar' : 'Crear cuenta'}
+                    </button>
+                </form>
+            )}
         </div>
     );
 }
