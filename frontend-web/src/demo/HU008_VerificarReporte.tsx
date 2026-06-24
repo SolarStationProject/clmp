@@ -29,14 +29,20 @@ export default function HU008_VerificarReporte() {
     const [verificando,setVerificando]= useState<string | null>(null);
     const [exito,      setExito]      = useState('');
     const [filtro,     setFiltro]     = useState<'todos'|'pendientes'>('pendientes');
+    const [errorApi,   setErrorApi]   = useState('');
 
     const cargar = () => {
         if (!sesion) return;
+        setErrorApi('');
         fetch(`${API_BASE}/api/reports/para-verificar`, {
             headers: { Authorization: `Bearer ${sesion.token}` },
         })
-            .then(r => r.json())
-            .then(d => setReportes(d.data || []))
+            .then(async r => {
+                const d = await r.json();
+                if (!r.ok) { setErrorApi(d.message || `Error ${r.status}`); return; }
+                setReportes(d.data || []);
+            })
+            .catch(e => setErrorApi(String(e)))
             .finally(() => setCargando(false));
     };
 
@@ -89,6 +95,14 @@ export default function HU008_VerificarReporte() {
                     🤖 <strong>Imagga AI</strong> ya verificó que la foto muestra basura al momento de crear el reporte. El admin puede dar un sello adicional de autenticidad municipal confirmando que el reporte es legítimo.
                 </p>
             </div>
+
+            {/* Error de API */}
+            {errorApi && (
+                <div style={{ backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '10px', padding: '12px 14px' }}>
+                    <p style={{ fontSize: '13px', fontWeight: '700', color: '#DC2626', margin: '0 0 4px' }}>❌ Error al cargar reportes</p>
+                    <p style={{ fontSize: '12px', color: '#991B1B', margin: 0, fontFamily: 'monospace' }}>{errorApi}</p>
+                </div>
+            )}
 
             {/* Filtro */}
             <Card>
