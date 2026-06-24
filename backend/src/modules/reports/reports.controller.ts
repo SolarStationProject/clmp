@@ -190,6 +190,7 @@ export async function crearReporte(req: Request, res: Response): Promise<void> {
                     message:   'La foto no muestra residuos ni basura. Por favor sube una foto clara del problema.',
                     etiquetas: imagga.etiquetas,
                     caption:   imagga.caption,
+                    _gemini:   (imagga as any)._raw,
                 });
                 return;
             }

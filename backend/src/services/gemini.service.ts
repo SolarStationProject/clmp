@@ -42,5 +42,5 @@ export async function verificarFotoBasura(fotoBase64: string): Promise<{
 
     const esBasura = texto.trim().toLowerCase().startsWith('yes');
 
-    return { esBasura, etiquetas: [], caption: texto.trim() };
+    return { esBasura, etiquetas: [], caption: texto.trim(), _raw: data };
 }
