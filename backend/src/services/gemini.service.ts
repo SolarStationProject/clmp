@@ -1,4 +1,4 @@
-const API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyB7iFkHlWsiHNVd-JxBvC9QdWE6r3rBIJs';
+const API_KEY = process.env.GEMINI_API_KEY || '';
 
 const PROMPT =
     'Answer only "yes" or "no". Does this photo show an illegal dumping site — ' +
