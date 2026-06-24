@@ -32,13 +32,9 @@ export async function verificarFotoBasura(fotoBase64: string): Promise<{
 
     const data = await res.json() as any;
 
-    // Extraer texto de la respuesta (el debug JSON en HU004 mostrará el formato real)
-    let texto = '';
-    if (Array.isArray(data.output)) {
-        texto = data.output.find((p: any) => p.type === 'text')?.text ?? '';
-    } else if (Array.isArray(data.candidates)) {
-        texto = data.candidates[0]?.content?.parts?.[0]?.text ?? '';
-    }
+    // Formato real: data.steps[] → type:"model_output" → content[0].text
+    const modelOutput = (data.steps || []).find((s: any) => s.type === 'model_output');
+    const texto = modelOutput?.content?.[0]?.text ?? '';
 
     const esBasura = texto.trim().toLowerCase().startsWith('yes');
 
