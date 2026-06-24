@@ -123,7 +123,7 @@ export default function HU008_VerificarReporte() {
                 ) : mostrar.length === 0 ? (
                     <p style={{ fontSize: '13px', color: '#94A3B8', textAlign: 'center' }}>No hay reportes pendientes de verificación. ✅</p>
                 ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '480px', overflowY: 'auto' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                         {mostrar.map(r => {
                             const cred = NIVEL_CREDIBILIDAD(r.confirmaciones, r.verificado_admin);
                             return (
