@@ -41,7 +41,7 @@ export default function HU004_CrearReporte() {
     const [enviando,         setEnviando]         = useState(false);
     const [errorEnvio,       setErrorEnvio]       = useState('');
     const [creado,           setCreado]           = useState<{ codigo: string } | null>(null);
-    const [rawResponse,      setRawResponse]      = useState<unknown>(null);
+    const [rawResponse,      setRawResponse]      = useState<any>(null);
     const [modoUbicacion,    setModoUbicacion]    = useState<'gps' | 'manual'>('gps');
     const [busqueda,         setBusqueda]         = useState('');
     const [buscando,         setBuscando]         = useState(false);
