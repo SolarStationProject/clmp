@@ -8,6 +8,7 @@ export async function verificarFotoBasura(fotoBase64: string): Promise<{
     esBasura: boolean;
     etiquetas: string[];
     caption?: string;
+    _raw?: unknown;
 }> {
     const mimeMatch = fotoBase64.match(/^data:(image\/\w+);base64,/);
     const mimeType  = mimeMatch?.[1] || 'image/jpeg';
