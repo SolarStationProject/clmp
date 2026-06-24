@@ -29,7 +29,7 @@ export default function HU013_ValidacionComunitaria() {
     const [mensajes,      setMensajes]      = useState<Record<string, string>>({});
 
     const cargar = () => {
-        if (!sesion) return;
+        if (!sesion) { setCargando(false); return; }
         fetch(`${API_BASE}/api/reports/para-confirmar`, {
             headers: { Authorization: `Bearer ${sesion.token}` },
         })
@@ -111,7 +111,7 @@ export default function HU013_ValidacionComunitaria() {
                 ) : reportes.length === 0 ? (
                     <p style={{ fontSize: '13px', color: '#94A3B8', textAlign: 'center' }}>No hay reportes activos de otros ciudadanos.</p>
                 ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '480px', overflowY: 'auto' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                         {reportes.map(r => {
                             const cred = NIVEL(r.confirmaciones);
                             return (
