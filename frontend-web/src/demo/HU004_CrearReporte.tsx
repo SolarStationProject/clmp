@@ -163,7 +163,7 @@ export default function HU004_CrearReporte() {
         setGeocodeOk(false);
         try {
             const r = await fetch(
-                `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(busqueda + ', Providencia, Santiago, Chile')}&format=json&limit=1&countrycodes=cl`
+                `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(busqueda + ', Providencia, Santiago, Chile')}&format=json&limit=1&countrycodes=cl&addressdetails=1`
             );
             const data = await r.json();
             if (!data.length) { setErrorGeocode('No se encontró esa dirección en Providencia.'); return; }
