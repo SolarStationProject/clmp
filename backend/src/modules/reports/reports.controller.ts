@@ -335,7 +335,7 @@ export async function exportarCSV(req: Request, res: Response): Promise<void> {
             return [
                 esc(r.codigo), esc(r.titulo), esc(r.categoria), esc(r.estado),
                 esc((r as any).prioridad ?? 'Normal'), esc(r.direccion), esc(r.comuna),
-                esc(r.nombre), esc(r.fecha_creacion),
+                esc((r as any).nombre), esc(r.fecha_creacion),
             ].join(',');
         }).join('\n');
         const csv = '﻿' + cabecera + filas; // BOM para Excel en español

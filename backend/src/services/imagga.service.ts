@@ -39,10 +39,10 @@ export async function verificarFotoBasura(fotoBase64: string): Promise<{
     const scene    = (tags.scene    || []).map((t: string) => t.toLowerCase());
 
     const esBasura =
-        objects.some(t  => TAGS_BASURA.includes(t))  ||
-        mood.some(t     => MOOD_BASURA.includes(t))   ||
-        extended.some(t => TAGS_BASURA.includes(t))   ||
-        scene.some(t    => SCENE_BASURA.includes(t));
+        objects.some((t: string)  => TAGS_BASURA.includes(t))  ||
+        mood.some((t: string)     => MOOD_BASURA.includes(t))   ||
+        extended.some((t: string) => TAGS_BASURA.includes(t))   ||
+        scene.some((t: string)    => SCENE_BASURA.includes(t));
 
     return {
         esBasura,
