@@ -27,20 +27,25 @@ export default function HU004_CrearReporte() {
 
     const sesion = getSession();
 
-    const [titulo,       setTitulo]       = useState('');
-    const [descripcion,  setDescripcion]  = useState('');
-    const [categoria,    setCategoria]    = useState('');
-    const [direccion,    setDireccion]    = useState('');
-    const [comuna,       setComuna]       = useState('');
-    const [foto,         setFoto]         = useState<{ nombre: string; preview: string; tamanoMB: number } | null>(null);
-    const [fotoError,    setFotoError]    = useState('');
-    const [coords,       setCoords]       = useState<{ lat: number; lng: number; precision: number } | null>(null);
-    const [gpsEstado,    setGpsEstado]    = useState<'idle' | 'cargando' | 'ok' | 'error'>('idle');
-    const [gpsError,     setGpsError]     = useState('');
-    const [ajustado,     setAjustado]     = useState(false);
-    const [enviando,     setEnviando]     = useState(false);
-    const [errorEnvio,   setErrorEnvio]   = useState('');
-    const [creado,       setCreado]       = useState<{ codigo: string } | null>(null);
+    const [titulo,           setTitulo]           = useState('');
+    const [descripcion,      setDescripcion]      = useState('');
+    const [categoria,        setCategoria]        = useState('');
+    const [direccion,        setDireccion]        = useState('');
+    const [comuna,           setComuna]           = useState('');
+    const [foto,             setFoto]             = useState<{ nombre: string; preview: string; tamanoMB: number } | null>(null);
+    const [fotoError,        setFotoError]        = useState('');
+    const [coords,           setCoords]           = useState<{ lat: number; lng: number; precision: number } | null>(null);
+    const [gpsEstado,        setGpsEstado]        = useState<'idle' | 'cargando' | 'ok' | 'error'>('idle');
+    const [gpsError,         setGpsError]         = useState('');
+    const [ajustado,         setAjustado]         = useState(false);
+    const [enviando,         setEnviando]         = useState(false);
+    const [errorEnvio,       setErrorEnvio]       = useState('');
+    const [creado,           setCreado]           = useState<{ codigo: string } | null>(null);
+    const [modoUbicacion,    setModoUbicacion]    = useState<'gps' | 'manual'>('gps');
+    const [busqueda,         setBusqueda]         = useState('');
+    const [buscando,         setBuscando]         = useState(false);
+    const [errorGeocode,     setErrorGeocode]     = useState('');
+    const [geocodeOk,        setGeocodeOk]        = useState(false);
 
     useLayoutEffect(() => {
         if (!mapRef.current || mapInstance.current) return;
@@ -117,6 +122,18 @@ export default function HU004_CrearReporte() {
                 setCoords({ lat, lng, precision: Math.round(accuracy) });
                 colocarMarcador(lat, lng, accuracy);
                 setGpsEstado('ok');
+                // Reverse geocoding automático con Nominatim
+                fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`)
+                    .then(r => r.json())
+                    .then(data => {
+                        const addr = data.address || {};
+                        const calle  = addr.road || addr.pedestrian || '';
+                        const numero = addr.house_number ? ` ${addr.house_number}` : '';
+                        if (calle) setDireccion(`${calle}${numero}`);
+                        const com = addr.suburb || addr.city_district || addr.quarter || addr.town || '';
+                        if (com) setComuna(com);
+                    })
+                    .catch(() => {});
             },
             (err) => {
                 setGpsEstado('error');
@@ -136,6 +153,37 @@ export default function HU004_CrearReporte() {
             },
             { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
         );
+    };
+
+    const buscarDireccion = async () => {
+        if (!busqueda.trim()) return;
+        setBuscando(true);
+        setErrorGeocode('');
+        setGeocodeOk(false);
+        try {
+            const r = await fetch(
+                `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(busqueda + ', Providencia, Santiago, Chile')}&format=json&limit=1&countrycodes=cl`
+            );
+            const data = await r.json();
+            if (!data.length) { setErrorGeocode('No se encontró esa dirección en Providencia.'); return; }
+            const lat = parseFloat(data[0].lat);
+            const lng = parseFloat(data[0].lon);
+            setCoords({ lat, lng, precision: 15 });
+            colocarMarcador(lat, lng, 15);
+            setGpsEstado('ok');
+            setGeocodeOk(true);
+            // También auto-rellenar dirección limpia
+            const addr = data[0].address || {};
+            const calle  = addr.road || addr.pedestrian || '';
+            const numero = addr.house_number ? ` ${addr.house_number}` : '';
+            if (calle && !direccion) setDireccion(`${calle}${numero}`);
+            const com = addr.suburb || addr.city_district || addr.quarter || '';
+            if (com && !comuna) setComuna(com);
+        } catch {
+            setErrorGeocode('No se pudo conectar con el servicio de geocodificación.');
+        } finally {
+            setBuscando(false);
+        }
     };
 
     const handleFoto = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -186,6 +234,7 @@ export default function HU004_CrearReporte() {
         setCreado(null); setTitulo(''); setDescripcion(''); setCategoria('');
         setDireccion(''); setComuna('');
         setFoto(null); setCoords(null); setGpsEstado('idle'); setAjustado(false); setErrorEnvio('');
+        setBusqueda(''); setErrorGeocode(''); setGeocodeOk(false); setModoUbicacion('gps');
     };
 
     // ── Pantalla de éxito ──────────────────────────────────────────
@@ -286,57 +335,107 @@ export default function HU004_CrearReporte() {
                     </FormField>
                 </Card>
 
-                {/* GPS + Mapa */}
+                {/* Ubicación: toggle GPS / Dirección manual */}
                 <Card>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                        <h3 style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b', margin: 0 }}>📍 Ubicación GPS</h3>
-                        <button
-                            type="button"
-                            onClick={capturarGPS}
-                            disabled={gpsEstado === 'cargando'}
-                            style={{ padding: '7px 14px', backgroundColor: gpsEstado === 'cargando' ? '#94a3b8' : '#0EA5E9', color: '#fff', border: 'none', borderRadius: '8px', cursor: gpsEstado === 'cargando' ? 'default' : 'pointer', fontSize: '12px', fontWeight: '700' }}
-                        >
-                            {gpsEstado === 'cargando' ? '⏳ Obteniendo…' : gpsEstado === 'ok' ? '🔄 Recapturar' : '📡 Capturar GPS'}
-                        </button>
+                    <h3 style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b', margin: '0 0 12px 0' }}>📍 Ubicación</h3>
+
+                    {/* Toggle */}
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
+                        {(['gps', 'manual'] as const).map(modo => (
+                            <button
+                                key={modo}
+                                type="button"
+                                onClick={() => { setModoUbicacion(modo); setCoords(null); setGpsEstado('idle'); setGeocodeOk(false); setErrorGeocode(''); }}
+                                style={{ flex: 1, padding: '8px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontWeight: '700', fontSize: '13px',
+                                    backgroundColor: modoUbicacion === modo ? '#0EA5E9' : '#F1F5F9',
+                                    color: modoUbicacion === modo ? '#fff' : '#64748B' }}
+                            >
+                                {modo === 'gps' ? '📡 GPS automático' : '✏️ Escribir dirección'}
+                            </button>
+                        ))}
                     </div>
 
+                    {/* Modo GPS */}
+                    {modoUbicacion === 'gps' && (
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
+                            <button
+                                type="button"
+                                onClick={capturarGPS}
+                                disabled={gpsEstado === 'cargando'}
+                                style={{ padding: '7px 14px', backgroundColor: gpsEstado === 'cargando' ? '#94a3b8' : '#0EA5E9', color: '#fff', border: 'none', borderRadius: '8px', cursor: gpsEstado === 'cargando' ? 'default' : 'pointer', fontSize: '12px', fontWeight: '700' }}
+                            >
+                                {gpsEstado === 'cargando' ? '⏳ Obteniendo…' : gpsEstado === 'ok' ? '🔄 Recapturar' : '📡 Capturar GPS'}
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Modo dirección manual */}
+                    {modoUbicacion === 'manual' && (
+                        <div style={{ marginBottom: '12px' }}>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <input
+                                    style={{ ...inputStyle, flex: 1 }}
+                                    type="text"
+                                    value={busqueda}
+                                    onChange={e => setBusqueda(e.target.value)}
+                                    onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), buscarDireccion())}
+                                    placeholder="Ej: Av. Providencia 1234"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={buscarDireccion}
+                                    disabled={buscando || !busqueda.trim()}
+                                    style={{ padding: '10px 16px', backgroundColor: buscando ? '#94a3b8' : '#0EA5E9', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: '700', fontSize: '13px', cursor: buscando ? 'default' : 'pointer', whiteSpace: 'nowrap' }}
+                                >
+                                    {buscando ? '⏳' : '🔍 Buscar'}
+                                </button>
+                            </div>
+                            <p style={{ fontSize: '11px', color: '#94A3B8', margin: '4px 0 0 0' }}>
+                                Busca la dirección dentro de Providencia — se ubicará en el mapa
+                            </p>
+                            {errorGeocode && <p style={{ fontSize: '12px', color: '#DC2626', fontWeight: '600', margin: '6px 0 0 0' }}>❌ {errorGeocode}</p>}
+                            {geocodeOk && <p style={{ fontSize: '12px', color: '#16A34A', fontWeight: '600', margin: '6px 0 0 0' }}>✅ Dirección encontrada y ubicada en el mapa</p>}
+                        </div>
+                    )}
+
+                    {/* Mapa (siempre visible) */}
                     <div style={{ borderRadius: '10px', overflow: 'hidden', height: '240px', marginBottom: '10px', position: 'relative' }}>
                         <div ref={mapRef} style={{ width: '100%', height: '100%' }} />
-                        {gpsEstado === 'idle' && (
+                        {!coords && (
                             <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10, borderRadius: '10px' }}>
                                 <p style={{ color: '#fff', fontSize: '12px', fontWeight: '600', background: 'rgba(0,0,0,0.45)', padding: '8px 14px', borderRadius: '8px' }}>
-                                    Captura el GPS para ver tu ubicación
+                                    {modoUbicacion === 'gps' ? 'Captura el GPS para ver tu ubicación' : 'Busca una dirección para ubicarla en el mapa'}
                                 </p>
                             </div>
                         )}
                     </div>
 
                     {gpsEstado === 'error' && (
-                        <div style={{ backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '8px', padding: '10px 12px', marginBottom: '10px' }}>
+                        <div style={{ backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '8px', padding: '10px 12px', marginBottom: '8px' }}>
                             <p style={{ fontSize: '13px', color: '#DC2626', fontWeight: '600', margin: 0 }}>❌ {gpsError}</p>
                         </div>
                     )}
 
                     {coords && (
-                        <div style={{ backgroundColor: gpsEstado === 'ok' ? '#F0F9FF' : '#FFFBEB', borderRadius: '8px', padding: '8px 12px', fontSize: '12px' }}>
-                            <span style={{ color: gpsEstado === 'ok' ? '#0EA5E9' : '#D97706', fontWeight: '700' }}>
-                                {ajustado ? '📌 Ajustado manualmente' : '✅ GPS capturado'}
+                        <div style={{ backgroundColor: '#F0F9FF', borderRadius: '8px', padding: '8px 12px', fontSize: '12px' }}>
+                            <span style={{ color: '#0EA5E9', fontWeight: '700' }}>
+                                {modoUbicacion === 'manual' ? '📌 Dirección geocodificada' : ajustado ? '📌 Ajustado manualmente' : '✅ GPS capturado'}
                             </span>
                             <span style={{ color: '#64748b', marginLeft: '8px' }}>
-                                {coords.lat.toFixed(6)}, {coords.lng.toFixed(6)} · ±{coords.precision}m
+                                {coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}
+                                {modoUbicacion === 'gps' && ` · ±${coords.precision}m`}
                             </span>
-                            {coords.precision > 50 && (
+                            {modoUbicacion === 'gps' && coords.precision > 50 && (
                                 <p style={{ color: '#D97706', margin: '4px 0 0 0', fontWeight: '600' }}>
-                                    ⚠️ Precisión baja ({coords.precision}m). Puedes arrastrar el marcador o hacer click en el mapa para ajustar.
+                                    ⚠️ Precisión baja ({coords.precision}m). Arrastra el marcador para ajustar.
+                                </p>
+                            )}
+                            {direccion && (
+                                <p style={{ color: '#16A34A', margin: '4px 0 0 0', fontWeight: '600' }}>
+                                    🏠 {direccion}{comuna ? `, ${comuna}` : ''}
                                 </p>
                             )}
                         </div>
-                    )}
-
-                    {!coords && gpsEstado !== 'cargando' && gpsEstado !== 'error' && (
-                        <p style={{ fontSize: '12px', color: '#94a3b8', textAlign: 'center', margin: 0 }}>
-                            Presiona "Capturar GPS" — el navegador pedirá permiso de ubicación
-                        </p>
                     )}
                 </Card>
 
@@ -345,7 +444,7 @@ export default function HU004_CrearReporte() {
                     style={btnStyle(coords && !enviando ? '#0EA5E9' : '#94a3b8')}
                     disabled={!coords || enviando}
                 >
-                    {enviando ? '⏳ Enviando reporte…' : coords ? '📤 Enviar reporte' : 'Captura el GPS primero'}
+                    {enviando ? '⏳ Enviando reporte…' : coords ? '📤 Enviar reporte' : modoUbicacion === 'gps' ? 'Captura el GPS primero' : 'Busca una dirección primero'}
                 </button>
                 {errorEnvio && (
                     <div style={{ backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '10px', padding: '12px', marginTop: '10px', fontSize: '13px', color: '#DC2626' }}>

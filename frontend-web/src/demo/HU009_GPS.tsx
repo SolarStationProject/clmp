@@ -26,6 +26,7 @@ export default function HU009_GPS() {
     const [ajustado,   setAjustado]   = useState(false);
     const [confirmado, setConfirmado] = useState(false);
     const [errorMsg,   setErrorMsg]   = useState('');
+    const [direccion,  setDireccion]  = useState('');
 
     useLayoutEffect(() => {
         if (!mapRef.current || mapInstance.current) return;
@@ -108,6 +109,17 @@ export default function HU009_GPS() {
                 setCoords({ lat, lng, precision: Math.round(accuracy) });
                 colocarMarcador(lat, lng, accuracy);
                 setEstado('capturado');
+                // Reverse geocoding automático
+                fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`)
+                    .then(r => r.json())
+                    .then(data => {
+                        const addr = data.address || {};
+                        const calle  = addr.road || addr.pedestrian || '';
+                        const numero = addr.house_number ? ` ${addr.house_number}` : '';
+                        const com    = addr.suburb || addr.city_district || addr.quarter || '';
+                        if (calle) setDireccion(`${calle}${numero}${com ? ', ' + com : ''}`);
+                    })
+                    .catch(() => {});
             },
             (err) => {
                 setEstado('error');
@@ -194,6 +206,14 @@ export default function HU009_GPS() {
                             </div>
                         ))}
                     </div>
+
+                    {/* Dirección obtenida automáticamente */}
+                    {direccion && (
+                        <div style={{ backgroundColor: '#F0FDF4', border: '1px solid #86EFAC', borderRadius: '10px', padding: '10px 14px', marginBottom: '14px' }}>
+                            <p style={{ fontSize: '11px', color: '#64748b', margin: '0 0 2px 0', fontWeight: '600' }}>🏠 Dirección detectada automáticamente</p>
+                            <p style={{ fontSize: '13px', fontWeight: '700', color: '#15803D', margin: 0 }}>{direccion}</p>
+                        </div>
+                    )}
 
                     {/* Indicador de precisión */}
                     <div style={{
