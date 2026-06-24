@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import * as reportsService from './reports.service';
 import * as reportsRepository from './reports.repository';
 import * as emailService from '../../services/email.service';
-import * as imaggaService from '../../services/imagga.service';
+import * as imaggaService from '../../services/gemini.service';
 import { EstadoReporte, RolUsuario } from '../../shared/types';
 
 // HU010/HU023: Lista de reportes propios del ciudadano
