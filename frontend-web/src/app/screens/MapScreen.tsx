@@ -226,7 +226,7 @@ export default function MapScreen() {
 
                         {seleccion.foto && (
                             <img
-                                src={seleccion.foto.startsWith('http') ? seleccion.foto : `${API_URL}${seleccion.foto}`}
+                                src={seleccion.foto.startsWith('http') || seleccion.foto.startsWith('data:') ? seleccion.foto : `${API_URL}${seleccion.foto}`}
                                 alt="foto"
                                 style={{ width: '100%', height: '100px', objectFit: 'cover', borderRadius: '10px', marginBottom: '12px' }}
                             />

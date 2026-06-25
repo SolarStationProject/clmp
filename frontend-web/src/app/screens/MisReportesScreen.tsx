@@ -22,7 +22,7 @@ export default function MisReportesScreen() {
     const [filtro,    setFiltro]    = useState<EstadoReporte | 'Todos'>('Todos');
 
     useEffect(() => {
-        api.get<{ success: boolean; data: Reporte[] }>('/api/reports/propios', { params: { ciudadanoId: uid } })
+        api.get<{ success: boolean; data: Reporte[] }>('/api/reports/my-reports', { params: { ciudadanoId: uid } })
             .then(r => setReportes(r.data.data || []))
             .catch(() => setError('No se pudieron cargar tus reportes.'))
             .finally(() => setCargando(false));
@@ -77,7 +77,7 @@ export default function MisReportesScreen() {
                         >
                             {r.foto && (
                                 <img
-                                    src={r.foto.startsWith('http') ? r.foto : `${API_URL}${r.foto}`}
+                                    src={r.foto.startsWith('http') || r.foto.startsWith('data:') ? r.foto : `${API_URL}${r.foto}`}
                                     alt="foto"
                                     style={{ width: '100%', height: '120px', objectFit: 'cover' }}
                                 />
