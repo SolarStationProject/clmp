@@ -22,7 +22,7 @@ export default function LoginScreen() {
             const res  = await fetch(`${API_URL}/api/auth/login`, {
                 method:  'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body:    JSON.stringify({ email, password, plataforma: 'movil' }),
+                body:    JSON.stringify({ email, password, plataforma: 'web' }),
             });
             const data = await res.json();
             if (!res.ok) { setError(data.error || data.message || 'Credenciales incorrectas.'); return; }

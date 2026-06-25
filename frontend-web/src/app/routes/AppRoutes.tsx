@@ -15,8 +15,12 @@ const CrearReporteScreen   = lazy(() => import('../screens/CrearReporteScreen'))
 
 // ── Admin portal ──────────────────────────────────────────────────────────────
 import AdminShell from '../../admin/AdminShell';
-const DashboardScreen  = lazy(() => import('../../admin/screens/DashboardScreen'));
-const ReportesScreen   = lazy(() => import('../../admin/screens/ReportesScreen'));
+const DashboardScreen       = lazy(() => import('../../admin/screens/DashboardScreen'));
+const ReportesScreen        = lazy(() => import('../../admin/screens/ReportesScreen'));
+const VerificarScreen       = lazy(() => import('../../admin/screens/VerificarScreen'));
+const NotificacionesScreen  = lazy(() => import('../../admin/screens/NotificacionesScreen'));
+const ExportarScreen        = lazy(() => import('../../admin/screens/ExportarScreen'));
+const MapaCalorScreen       = lazy(() => import('../../admin/screens/MapaCalorScreen'));
 
 // ── Demo (administrador + HUs) ─────────────────────────────────────────────────
 import AuthGuard from '../../demo/AuthGuard';
@@ -115,6 +119,18 @@ export default function AppRoutes() {
                 } />
                 <Route path="/admin/reportes" element={
                     <AdminGuard><AdminShell><ReportesScreen /></AdminShell></AdminGuard>
+                } />
+                <Route path="/admin/verificar" element={
+                    <AdminGuard><AdminShell><VerificarScreen /></AdminShell></AdminGuard>
+                } />
+                <Route path="/admin/notificaciones" element={
+                    <AdminGuard><AdminShell><NotificacionesScreen /></AdminShell></AdminGuard>
+                } />
+                <Route path="/admin/exportar" element={
+                    <AdminGuard><AdminShell><ExportarScreen /></AdminShell></AdminGuard>
+                } />
+                <Route path="/admin/mapa" element={
+                    <AdminGuard><AdminShell><MapaCalorScreen /></AdminShell></AdminGuard>
                 } />
 
                 {/* Demo (skeleton HUs — se mantiene para referencia) */}
