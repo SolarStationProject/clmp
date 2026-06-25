@@ -15,7 +15,8 @@ const CrearReporteScreen   = lazy(() => import('../screens/CrearReporteScreen'))
 
 // ── Admin portal ──────────────────────────────────────────────────────────────
 import AdminShell from '../../admin/AdminShell';
-const DashboardScreen = lazy(() => import('../../admin/screens/DashboardScreen'));
+const DashboardScreen  = lazy(() => import('../../admin/screens/DashboardScreen'));
+const ReportesScreen   = lazy(() => import('../../admin/screens/ReportesScreen'));
 
 // ── Demo (administrador + HUs) ─────────────────────────────────────────────────
 import AuthGuard from '../../demo/AuthGuard';
@@ -111,6 +112,9 @@ export default function AppRoutes() {
                 {/* Admin portal */}
                 <Route path="/admin" element={
                     <AdminGuard><AdminShell><DashboardScreen /></AdminShell></AdminGuard>
+                } />
+                <Route path="/admin/reportes" element={
+                    <AdminGuard><AdminShell><ReportesScreen /></AdminShell></AdminGuard>
                 } />
 
                 {/* Demo (skeleton HUs — se mantiene para referencia) */}
