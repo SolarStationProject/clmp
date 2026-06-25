@@ -33,7 +33,7 @@ export default function LoginScreen() {
             localStorage.setItem('cleanmap_nombre', data.usuario.nombre);
 
             if (data.usuario.rol === 'Administrador') {
-                navigate('/demo', { replace: true });
+                navigate('/admin', { replace: true });
             } else {
                 navigate('/app/mapa', { replace: true });
             }

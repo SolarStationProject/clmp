@@ -13,6 +13,10 @@ const ReporteDetalleScreen = lazy(() => import('../screens/ReporteDetalleScreen'
 const EditarReporteScreen  = lazy(() => import('../screens/EditarReporteScreen'));
 const CrearReporteScreen   = lazy(() => import('../screens/CrearReporteScreen'));
 
+// ── Admin portal ──────────────────────────────────────────────────────────────
+import AdminShell from '../../admin/AdminShell';
+const DashboardScreen = lazy(() => import('../../admin/screens/DashboardScreen'));
+
 // ── Demo (administrador + HUs) ─────────────────────────────────────────────────
 import AuthGuard from '../../demo/AuthGuard';
 const DemoIndex = lazy(() => import('../../demo/DemoIndex'));
@@ -40,6 +44,15 @@ const HU021 = lazy(() => import('../../demo/HU021_DetalleReporte'));
 const HU022 = lazy(() => import('../../demo/HU022_DeteccionDuplicados'));
 const HU023 = lazy(() => import('../../demo/HU023_HistorialReportes'));
 
+// ── Guard administrador ────────────────────────────────────────────────────────
+function AdminGuard({ children }: { children: React.ReactNode }) {
+    const token = localStorage.getItem('cleanmap_token');
+    const rol   = localStorage.getItem('cleanmap_rol');
+    if (!token) return <Navigate to="/login" replace />;
+    if (rol !== 'Administrador') return <Navigate to="/app/mapa" replace />;
+    return <>{children}</>;
+}
+
 // ── Guard ciudadano ────────────────────────────────────────────────────────────
 function CiudadanoGuard({ children }: { children: React.ReactNode }) {
     const token  = localStorage.getItem('cleanmap_token');
@@ -64,9 +77,10 @@ export default function AppRoutes() {
                     (() => {
                         const rol = localStorage.getItem('cleanmap_rol');
                         const tok = localStorage.getItem('cleanmap_token');
-                        if (!tok)                    return <Navigate to="/login"    replace />;
-                        if (rol === 'Ciudadano')     return <Navigate to="/app/mapa" replace />;
-                        return                              <Navigate to="/demo"      replace />;
+                        if (!tok)                        return <Navigate to="/login"    replace />;
+                        if (rol === 'Ciudadano')         return <Navigate to="/app/mapa" replace />;
+                        if (rol === 'Administrador')     return <Navigate to="/admin"    replace />;
+                        return                                  <Navigate to="/login"    replace />;
                     })()
                 } />
 
@@ -94,7 +108,12 @@ export default function AppRoutes() {
                     <CiudadanoGuard><CrearReporteScreen /></CiudadanoGuard>
                 } />
 
-                {/* Demo + admin */}
+                {/* Admin portal */}
+                <Route path="/admin" element={
+                    <AdminGuard><AdminShell><DashboardScreen /></AdminShell></AdminGuard>
+                } />
+
+                {/* Demo (skeleton HUs — se mantiene para referencia) */}
                 <Route path="/demo"       element={<DemoIndex />} />
                 <Route path="/demo/hu001" element={<HU001 />} />
                 <Route path="/demo/hu002" element={<HU002 />} />
