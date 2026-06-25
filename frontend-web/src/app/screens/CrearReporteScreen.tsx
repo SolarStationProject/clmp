@@ -33,6 +33,24 @@ export default function CrearReporteScreen() {
     const [duplicados,  setDuplicados]  = useState<any[] | null>(null);
     const [checkDup,    setCheckDup]    = useState(false);
 
+    const checkDuplicados = (lat: number, lng: number) => {
+        setCheckDup(true); setDuplicados(null);
+        api.get(`/api/reports/check-duplicado?lat=${lat}&lng=${lng}`)
+            .then((r: any) => setDuplicados(r.data.duplicados ?? []))
+            .catch(() => setDuplicados([]))
+            .finally(() => setCheckDup(false));
+    };
+
+    const crearMarker = (latlng: L.LatLng, map: L.Map) => {
+        const m = L.marker(latlng, { icon: ICON_PIN, draggable: true }).addTo(map);
+        m.on('dragend', () => {
+            const pos = m.getLatLng();
+            setCoords({ lat: pos.lat, lng: pos.lng });
+            checkDuplicados(pos.lat, pos.lng);
+        });
+        return m;
+    };
+
     useLayoutEffect(() => {
         if (paso !== 2) return;
         if (!mapRef.current || mapInst.current) return;
@@ -44,12 +62,8 @@ export default function CrearReporteScreen() {
             const { lat, lng } = e.latlng;
             setCoords({ lat, lng });
             if (markerR.current) { markerR.current.setLatLng(e.latlng); }
-            else { markerR.current = L.marker(e.latlng, { icon: ICON_PIN, draggable: true }).addTo(map); }
-            setCheckDup(true); setDuplicados(null);
-            api.get(`/api/reports/check-duplicado?lat=${lat}&lng=${lng}`)
-                .then((r: any) => setDuplicados(r.data.duplicados ?? []))
-                .catch(() => setDuplicados([]))
-                .finally(() => setCheckDup(false));
+            else { markerR.current = crearMarker(e.latlng, map); }
+            checkDuplicados(lat, lng);
         });
         return () => { map.remove(); mapInst.current = null; markerR.current = null; };
     }, [paso]);
@@ -60,14 +74,10 @@ export default function CrearReporteScreen() {
             const ll = L.latLng(pos.coords.latitude, pos.coords.longitude);
             setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
             if (markerR.current) { markerR.current.setLatLng(ll); }
-            else { markerR.current = L.marker(ll, { icon: ICON_PIN, draggable: true }).addTo(mapInst.current!); }
+            else if (mapInst.current) { markerR.current = crearMarker(ll, mapInst.current); }
             mapInst.current?.setView(ll, 16);
             setGpsOk(true);
-            setCheckDup(true); setDuplicados(null);
-            api.get(`/api/reports/check-duplicado?lat=${pos.coords.latitude}&lng=${pos.coords.longitude}`)
-                .then((r: any) => setDuplicados(r.data.duplicados ?? []))
-                .catch(() => setDuplicados([]))
-                .finally(() => setCheckDup(false));
+            checkDuplicados(pos.coords.latitude, pos.coords.longitude);
             fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&accept-language=es`)
                 .then(r => r.json())
                 .then(d => {

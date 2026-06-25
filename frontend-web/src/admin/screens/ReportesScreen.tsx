@@ -200,7 +200,7 @@ export default function ReportesScreen() {
 
                 <div style={{ backgroundColor: '#fff', borderRadius: '14px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
                     {/* Header tabla */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '110px 1fr 120px 100px 130px 110px 100px', gap: '0 12px', backgroundColor: '#F8FAFC', borderBottom: '1px solid #E2E8F0', padding: '10px 16px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '110px 1fr 120px 100px 130px 110px 100px', gap: '0 20px', backgroundColor: '#F8FAFC', borderBottom: '1px solid #E2E8F0', padding: '10px 16px' }}>
                         {['Código', 'Título', 'Estado', 'Prioridad', 'Categoría', 'Comuna', 'Fecha'].map(h => (
                             <span key={h} style={{ fontSize: '11px', fontWeight: '700', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</span>
                         ))}
