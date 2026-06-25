@@ -216,8 +216,8 @@ export default function ReportesScreen() {
                             const active = seleccionado?.id === r.id;
                             return (
                                 <div key={r.id} onClick={() => seleccionar(r)} style={{
-                                    display: 'grid', gridTemplateColumns: '110px 1fr 110px 90px 130px 110px 100px',
-                                    gap: '0', padding: '12px 16px', borderBottom: '1px solid #F1F5F9',
+                                    display: 'grid', gridTemplateColumns: '110px 1fr 120px 100px 130px 110px 100px',
+                                    gap: '0 20px', padding: '12px 16px', borderBottom: '1px solid #F1F5F9',
                                     cursor: 'pointer', alignItems: 'center',
                                     backgroundColor: active ? '#F0FDF4' : 'transparent',
                                     transition: 'background-color 0.1s',
