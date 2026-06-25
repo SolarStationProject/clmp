@@ -34,9 +34,11 @@ export default function CrearReporteScreen() {
     const [checkDup,    setCheckDup]    = useState(false);
 
     useLayoutEffect(() => {
+        if (paso !== 2) return;
         if (!mapRef.current || mapInst.current) return;
         const map = L.map(mapRef.current, { center: [-33.4378, -70.6260], zoom: 14, zoomControl: false, attributionControl: false });
         mapInst.current = map;
+        setTimeout(() => map.invalidateSize(), 50);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 20 }).addTo(map);
         map.on('click', (e: L.LeafletMouseEvent) => {
             const { lat, lng } = e.latlng;
@@ -49,8 +51,8 @@ export default function CrearReporteScreen() {
                 .catch(() => setDuplicados([]))
                 .finally(() => setCheckDup(false));
         });
-        return () => { map.remove(); mapInst.current = null; };
-    }, []);
+        return () => { map.remove(); mapInst.current = null; markerR.current = null; };
+    }, [paso]);
 
     const capturarGPS = () => {
         if (!navigator.geolocation) return;
