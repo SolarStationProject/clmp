@@ -116,7 +116,7 @@ export default function VerificarScreen() {
                             return (
                                 <div key={r.id} style={{ borderRadius: '12px', border: '1px solid #E2E8F0', overflow: 'hidden', backgroundColor: '#F8FAFC' }}>
                                     {r.foto && (
-                                        <img src={r.foto.startsWith('http') ? r.foto : `${API_URL}${r.foto}`} alt="foto reporte" style={{ width: '100%', height: '140px', objectFit: 'cover' }} />
+                                        <img src={r.foto.startsWith('http') || r.foto.startsWith('data:') ? r.foto : `${API_URL}${r.foto}`} alt="foto reporte" style={{ width: '100%', height: '140px', objectFit: 'cover' }} />
                                     )}
                                     <div style={{ padding: '14px' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
