@@ -30,6 +30,8 @@ export default function CrearReporteScreen() {
     const [enviando,    setEnviando]    = useState(false);
     const [error,       setError]       = useState('');
     const [paso,        setPaso]        = useState<1 | 2>(1);
+    const [duplicados,  setDuplicados]  = useState<any[] | null>(null);
+    const [checkDup,    setCheckDup]    = useState(false);
 
     useLayoutEffect(() => {
         if (!mapRef.current || mapInst.current) return;
@@ -37,9 +39,15 @@ export default function CrearReporteScreen() {
         mapInst.current = map;
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 20 }).addTo(map);
         map.on('click', (e: L.LeafletMouseEvent) => {
-            setCoords({ lat: e.latlng.lat, lng: e.latlng.lng });
+            const { lat, lng } = e.latlng;
+            setCoords({ lat, lng });
             if (markerR.current) { markerR.current.setLatLng(e.latlng); }
             else { markerR.current = L.marker(e.latlng, { icon: ICON_PIN, draggable: true }).addTo(map); }
+            setCheckDup(true); setDuplicados(null);
+            api.get(`/api/reports/check-duplicado?lat=${lat}&lng=${lng}`)
+                .then((r: any) => setDuplicados(r.data.duplicados ?? []))
+                .catch(() => setDuplicados([]))
+                .finally(() => setCheckDup(false));
         });
         return () => { map.remove(); mapInst.current = null; };
     }, []);
@@ -53,6 +61,11 @@ export default function CrearReporteScreen() {
             else { markerR.current = L.marker(ll, { icon: ICON_PIN, draggable: true }).addTo(mapInst.current!); }
             mapInst.current?.setView(ll, 16);
             setGpsOk(true);
+            setCheckDup(true); setDuplicados(null);
+            api.get(`/api/reports/check-duplicado?lat=${pos.coords.latitude}&lng=${pos.coords.longitude}`)
+                .then((r: any) => setDuplicados(r.data.duplicados ?? []))
+                .catch(() => setDuplicados([]))
+                .finally(() => setCheckDup(false));
             fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&accept-language=es`)
                 .then(r => r.json())
                 .then(d => {
@@ -193,6 +206,37 @@ export default function CrearReporteScreen() {
                                 <input style={inp} type="text" placeholder="Dirección (auto-detectada con GPS)" value={direccion} onChange={e => setDireccion(e.target.value)} />
                                 <input style={inp} type="text" placeholder="Comuna (ej: Providencia)" value={comuna} onChange={e => setComuna(e.target.value)} />
                             </div>
+
+                            {/* Resultado verificación duplicados */}
+                            {checkDup && (
+                                <div style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', padding: '12px', fontSize: '13px', color: '#64748B' }}>
+                                    🔍 Verificando si ya existe un reporte cercano…
+                                </div>
+                            )}
+                            {!checkDup && duplicados !== null && duplicados.length > 0 && (
+                                <div style={{ backgroundColor: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '12px', padding: '14px' }}>
+                                    <p style={{ fontSize: '13px', fontWeight: '700', color: '#92400E', margin: '0 0 8px 0' }}>
+                                        ⚠️ {duplicados.length} reporte(s) ya registrado(s) a menos de 50m
+                                    </p>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '8px' }}>
+                                        {duplicados.map((d: any) => (
+                                            <div key={d.id} style={{ backgroundColor: '#fff', borderRadius: '8px', padding: '8px 10px', border: '1px solid #FDE68A', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <div style={{ minWidth: 0 }}>
+                                                    <p style={{ fontSize: '12px', fontWeight: '700', color: '#1E293B', margin: '0 0 1px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.titulo}</p>
+                                                    <p style={{ fontSize: '11px', color: '#64748B', margin: 0 }}>{d.codigo} · {d.categoria}</p>
+                                                </div>
+                                                <span style={{ fontSize: '11px', fontWeight: '700', color: '#F59E0B', marginLeft: '8px', flexShrink: 0 }}>📏 {d.distancia_metros}m</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <p style={{ fontSize: '12px', color: '#78350F', margin: 0 }}>Puedes igual enviar el reporte si consideras que es un problema distinto.</p>
+                                </div>
+                            )}
+                            {!checkDup && duplicados !== null && duplicados.length === 0 && (
+                                <div style={{ backgroundColor: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '10px', padding: '10px 14px', fontSize: '13px', color: '#15803D', fontWeight: '600' }}>
+                                    ✅ Sin reportes duplicados en esta zona
+                                </div>
+                            )}
 
                             {error && (
                                 <div style={{ backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '10px', padding: '12px', fontSize: '13px', color: '#DC2626' }}>
