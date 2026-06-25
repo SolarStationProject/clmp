@@ -41,12 +41,28 @@ export default function CrearReporteScreen() {
             .finally(() => setCheckDup(false));
     };
 
+    const reverseGeocode = (lat: number, lng: number) => {
+        fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`)
+            .then(r => r.json())
+            .then(d => {
+                const a = d.address || {};
+                const calle = a.road || a.pedestrian || '';
+                const num   = a.house_number ? ` ${a.house_number}` : '';
+                if (calle) setDireccion(`${calle}${num}`);
+                else setDireccion('');
+                const com = a.suburb || a.city_district || a.quarter || '';
+                setComuna(com || '');
+            })
+            .catch(() => {});
+    };
+
     const crearMarker = (latlng: L.LatLng, map: L.Map) => {
         const m = L.marker(latlng, { icon: ICON_PIN, draggable: true }).addTo(map);
         m.on('dragend', () => {
             const pos = m.getLatLng();
             setCoords({ lat: pos.lat, lng: pos.lng });
             checkDuplicados(pos.lat, pos.lng);
+            reverseGeocode(pos.lat, pos.lng);
         });
         return m;
     };
@@ -64,6 +80,7 @@ export default function CrearReporteScreen() {
             if (markerR.current) { markerR.current.setLatLng(e.latlng); }
             else { markerR.current = crearMarker(e.latlng, map); }
             checkDuplicados(lat, lng);
+            reverseGeocode(lat, lng);
         });
         return () => { map.remove(); mapInst.current = null; markerR.current = null; };
     }, [paso]);
@@ -78,17 +95,7 @@ export default function CrearReporteScreen() {
             mapInst.current?.setView(ll, 16);
             setGpsOk(true);
             checkDuplicados(pos.coords.latitude, pos.coords.longitude);
-            fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&accept-language=es`)
-                .then(r => r.json())
-                .then(d => {
-                    const a = d.address || {};
-                    const calle = a.road || a.pedestrian || '';
-                    const num   = a.house_number ? ` ${a.house_number}` : '';
-                    if (calle) setDireccion(`${calle}${num}`);
-                    const com = a.suburb || a.city_district || a.quarter || '';
-                    if (com) setComuna(com);
-                })
-                .catch(() => {});
+            reverseGeocode(pos.coords.latitude, pos.coords.longitude);
         });
     };
 

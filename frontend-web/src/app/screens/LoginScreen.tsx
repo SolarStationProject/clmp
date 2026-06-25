@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Capacitor } from '@capacitor/core';
 const API_URL = import.meta.env.VITE_API_URL || '';
+const PLATAFORMA = Capacitor.isNativePlatform() ? 'movil' : 'web';
 
 export default function LoginScreen() {
     const navigate = useNavigate();
@@ -22,7 +24,7 @@ export default function LoginScreen() {
             const res  = await fetch(`${API_URL}/api/auth/login`, {
                 method:  'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body:    JSON.stringify({ email, password, plataforma: 'web' }),
+                body:    JSON.stringify({ email, password, plataforma: PLATAFORMA }),
             });
             const data = await res.json();
             if (!res.ok) { setError(data.error || data.message || 'Credenciales incorrectas.'); return; }
