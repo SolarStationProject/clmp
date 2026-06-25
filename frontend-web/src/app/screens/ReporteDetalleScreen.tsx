@@ -38,6 +38,7 @@ export default function ReporteDetalleScreen() {
 
     const [detalle,    setDetalle]    = useState<Detalle | null>(null);
     const [cargando,   setCargando]   = useState(true);
+    const [errCarga,   setErrCarga]   = useState('');
     const [modalDel,   setModalDel]   = useState(false);
     const [eliminando, setEliminando] = useState(false);
     const [errDel,     setErrDel]     = useState('');
@@ -46,7 +47,7 @@ export default function ReporteDetalleScreen() {
         if (!reportId) { setCargando(false); return; }
         api.get<{ data: Detalle }>(`/api/reports/${reportId}`, { params: { usuarioRol: 'Ciudadano' } })
             .then(r => setDetalle(r.data.data))
-            .catch(() => {})
+            .catch((e) => setErrCarga(e?.message || 'Error de conexión'))
             .finally(() => setCargando(false));
     }, [reportId]);
 
@@ -91,7 +92,10 @@ export default function ReporteDetalleScreen() {
                 {cargando ? (
                     <div style={{ textAlign: 'center', padding: '60px 0', color: '#94A3B8' }}>Cargando…</div>
                 ) : !detalle ? (
-                    <div style={{ textAlign: 'center', padding: '60px 0', color: '#94A3B8' }}>Reporte no encontrado.</div>
+                    <div style={{ textAlign: 'center', padding: '60px 0', color: '#94A3B8' }}>
+                        <p style={{ margin: '0 0 8px', fontSize: '15px' }}>Reporte no encontrado.</p>
+                        {errCarga && <p style={{ margin: 0, fontSize: '12px', color: '#EF4444', fontFamily: 'monospace' }}>{errCarga}</p>}
+                    </div>
                 ) : (
                     <>
                         {/* Foto */}

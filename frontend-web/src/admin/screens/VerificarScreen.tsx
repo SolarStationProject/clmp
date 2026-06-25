@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { api } from '../../services/api';
+import { api, API_URL } from '../../services/api';
 
 const PRIORIDAD_COLOR: Record<string, string> = { Baja:'#94A3B8', Normal:'#0EA5E9', Alta:'#F59E0B', 'Crítica':'#EF4444' };
 const ESTADO_COLOR: Record<string, string>    = { Pendiente:'#EF4444','En Proceso':'#F59E0B',Resuelto:'#22C55E',Rechazado:'#6B7280' };
@@ -116,7 +116,7 @@ export default function VerificarScreen() {
                             return (
                                 <div key={r.id} style={{ borderRadius: '12px', border: '1px solid #E2E8F0', overflow: 'hidden', backgroundColor: '#F8FAFC' }}>
                                     {r.foto && (
-                                        <img src={r.foto} alt="foto reporte" style={{ width: '100%', height: '140px', objectFit: 'cover' }} />
+                                        <img src={r.foto.startsWith('http') ? r.foto : `${API_URL}${r.foto}`} alt="foto reporte" style={{ width: '100%', height: '140px', objectFit: 'cover' }} />
                                     )}
                                     <div style={{ padding: '14px' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>

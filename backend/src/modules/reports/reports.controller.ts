@@ -58,7 +58,8 @@ export async function eliminarReporte(req: Request, res: Response): Promise<void
 
 // HU021: Detalle completo con filtro de privacidad según rol
 export async function getDetalleReporte(req: Request, res: Response): Promise<void> {
-    const { id, usuarioRol } = req.query;
+    const id = req.params.id;
+    const { usuarioRol } = req.query;
     if (!id) {
         res.status(400).json({ success: false, message: 'El ID del reporte es requerido.' });
         return;
