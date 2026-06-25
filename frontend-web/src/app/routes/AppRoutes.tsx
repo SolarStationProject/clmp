@@ -8,6 +8,7 @@ const MapScreen         = lazy(() => import('../screens/MapScreen'));
 const MisReportesScreen = lazy(() => import('../screens/MisReportesScreen'));
 const PerfilScreen      = lazy(() => import('../screens/PerfilScreen'));
 
+const RecuperarScreen      = lazy(() => import('../screens/RecuperarScreen'));
 const ReporteDetalleScreen = lazy(() => import('../screens/ReporteDetalleScreen'));
 const EditarReporteScreen  = lazy(() => import('../screens/EditarReporteScreen'));
 const CrearReporteScreen   = lazy(() => import('../screens/CrearReporteScreen'));
@@ -69,8 +70,9 @@ export default function AppRoutes() {
                     })()
                 } />
 
-                {/* Login/Registro ciudadano */}
-                <Route path="/login" element={<LoginScreen />} />
+                {/* Login/Registro/Recuperar — rutas públicas */}
+                <Route path="/login"     element={<LoginScreen />} />
+                <Route path="/recuperar" element={<RecuperarScreen />} />
 
                 {/* App ciudadano con bottom tabs */}
                 <Route path="/app/mapa" element={

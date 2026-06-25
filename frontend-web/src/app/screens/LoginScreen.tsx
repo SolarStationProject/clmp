@@ -177,6 +177,13 @@ export default function LoginScreen() {
                     <button type="submit" style={btn} disabled={cargando}>
                         {cargando ? '⏳ Cargando…' : modo === 'login' ? 'Entrar' : 'Crear cuenta'}
                     </button>
+
+                    {modo === 'login' && (
+                        <button type="button" onClick={() => navigate('/recuperar')}
+                            style={{ background: 'none', border: 'none', color: '#005c2e', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: '4px 0', textDecoration: 'underline', fontFamily: 'inherit' }}>
+                            ¿Olvidaste tu contraseña?
+                        </button>
+                    )}
                 </form>
             )}
         </div>
