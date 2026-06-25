@@ -8,9 +8,9 @@ const MapScreen         = lazy(() => import('../screens/MapScreen'));
 const MisReportesScreen = lazy(() => import('../screens/MisReportesScreen'));
 const PerfilScreen      = lazy(() => import('../screens/PerfilScreen'));
 
-// Reutiliza ReportDetail existente para el detalle de reporte ciudadano
-const ReportDetail        = lazy(() => import('../../pages/main/ReportDetail'));
-const CrearReporteScreen  = lazy(() => import('../screens/CrearReporteScreen'));
+const ReporteDetalleScreen = lazy(() => import('../screens/ReporteDetalleScreen'));
+const EditarReporteScreen  = lazy(() => import('../screens/EditarReporteScreen'));
+const CrearReporteScreen   = lazy(() => import('../screens/CrearReporteScreen'));
 
 // ── Demo (administrador + HUs) ─────────────────────────────────────────────────
 import AuthGuard from '../../demo/AuthGuard';
@@ -83,7 +83,10 @@ export default function AppRoutes() {
                     <CiudadanoGuard><AppShell><PerfilScreen /></AppShell></CiudadanoGuard>
                 } />
                 <Route path="/app/reporte" element={
-                    <CiudadanoGuard><ReportDetail /></CiudadanoGuard>
+                    <CiudadanoGuard><ReporteDetalleScreen /></CiudadanoGuard>
+                } />
+                <Route path="/app/editar" element={
+                    <CiudadanoGuard><EditarReporteScreen /></CiudadanoGuard>
                 } />
                 <Route path="/app/crear" element={
                     <CiudadanoGuard><CrearReporteScreen /></CiudadanoGuard>
