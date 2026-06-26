@@ -87,7 +87,7 @@ export async function login(
             { status: 403, accion: 'acceso_denegado' }
         );
     }
-    if (usuario.rol === 'Ciudadano' && plataforma !== 'movil' && plataforma !== 'web') {
+    if (usuario.rol === 'Ciudadano' && plataforma !== 'movil') {
         throw Object.assign(
             new Error('Para reportar incidentes, descarga nuestra aplicación móvil.'),
             { status: 403, accion: 'redirigir_descarga' }
