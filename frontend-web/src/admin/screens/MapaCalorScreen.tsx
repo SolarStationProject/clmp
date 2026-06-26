@@ -143,9 +143,6 @@ export default function MapaCalorScreen() {
                 >
                     {exportando ? 'Exportando…' : '⬇️ Exportar CSV'}
                 </button>
-                <p style={{ fontSize: '13px', color: '#64748B', margin: 0, flexShrink: 0 }}>
-                    {cargando ? 'Cargando datos…' : `${datos?.total_puntos ?? 0} reportes en el mapa`}
-                </p>
             </div>
 
             {/* Mapa + panel lateral */}

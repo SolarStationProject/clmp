@@ -42,15 +42,6 @@ export default function ExportarScreen() {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '640px' }}>
 
-            {/* Descripción */}
-            <div style={{ backgroundColor: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: '12px', padding: '14px 16px' }}>
-                <p style={{ fontSize: '14px', fontWeight: '700', color: '#065F46', margin: '0 0 6px' }}>📊 ¿Qué incluye el CSV?</p>
-                <p style={{ fontSize: '13px', color: '#047857', margin: 0, lineHeight: 1.6 }}>
-                    Exporta todos los reportes activos del sistema. El archivo incluye BOM UTF-8 para
-                    compatibilidad con Excel en español.
-                </p>
-            </div>
-
             {/* Vista previa columnas */}
             <div style={{ backgroundColor: '#fff', borderRadius: '14px', padding: '20px 24px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
                 <p style={{ fontSize: '14px', fontWeight: '700', color: '#1E293B', margin: '0 0 14px' }}>Columnas del archivo exportado</p>
@@ -95,14 +86,6 @@ export default function ExportarScreen() {
                 )}
             </div>
 
-            {/* Nota técnica */}
-            <div style={{ backgroundColor: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '12px', padding: '12px 16px' }}>
-                <p style={{ fontSize: '12px', color: '#92400E', margin: 0, lineHeight: 1.6 }}>
-                    💡 El backend genera el CSV directamente desde PostgreSQL y lo sirve con{' '}
-                    <code>Content-Disposition: attachment</code>. El BOM al inicio garantiza que Excel
-                    detecte el encoding UTF-8 correctamente.
-                </p>
-            </div>
         </div>
     );
 }

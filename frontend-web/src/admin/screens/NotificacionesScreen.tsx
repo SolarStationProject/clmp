@@ -34,16 +34,6 @@ export default function NotificacionesScreen() {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
-            {/* Explicación */}
-            <div style={{ backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '12px', padding: '14px 16px' }}>
-                <p style={{ fontSize: '14px', fontWeight: '700', color: '#1E40AF', margin: '0 0 6px' }}>📧 ¿Cómo funciona?</p>
-                <p style={{ fontSize: '13px', color: '#1D4ED8', margin: 0, lineHeight: 1.6 }}>
-                    Cada vez que el administrador cambia el estado de un reporte (desde Reportes), el ciudadano
-                    recibe automáticamente un email con el nuevo estado y el comentario ingresado.
-                    Los usuarios demo (<code>@ciudadano.cl</code>) simulan el envío sin consumir créditos SendGrid.
-                </p>
-            </div>
-
             {/* KPIs */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px' }}>
                 {[
@@ -116,13 +106,6 @@ export default function NotificacionesScreen() {
                 )}
             </div>
 
-            {/* Nota demo */}
-            <div style={{ backgroundColor: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '12px', padding: '12px 16px' }}>
-                <p style={{ fontSize: '12px', color: '#92400E', margin: 0, lineHeight: 1.6 }}>
-                    ⚠️ <strong>Modo demo:</strong> los emails a usuarios <code>@ciudadano.cl</code> se simulan en consola del
-                    servidor y no se envían realmente. Solo cuentas con email real recibirán la notificación.
-                </p>
-            </div>
         </div>
     );
 }
